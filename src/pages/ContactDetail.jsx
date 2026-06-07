@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import ContactHeader from '../components/ContactHeader';
+import NewDealModal from '../components/modals/NewDealModal';
 import DealsList from '../components/DealsList';
 import ActivityTimeline from '../components/ActivityTimeline';
 import { useContactDetail } from '../hooks/useContactDetail';
@@ -15,6 +16,7 @@ export default function ContactDetail() {
   const { id } = useParams();
   const contactId = id;
   const [activeTab, setActiveTab] = useState('deals');
+  const [showNewDeal, setShowNewDeal] = useState(false);
   const [activityFilter, setActivityFilter] = useState('all');
   const [notesEditing, setNotesEditing] = useState(false);
   const [notesValue, setNotesValue] = useState('');
@@ -29,6 +31,7 @@ export default function ContactDetail() {
     updateContactNotes,
     updateContactTags,
   } = useContactDetail(contactId);
+  const navigate = useNavigate();
 
   const filteredActivities = useMemo(() => {
     if (!activities) return [];
@@ -66,12 +69,19 @@ export default function ContactDetail() {
   };
 
   const handleNewDeal = () => {
-    // placeholder for modal or navigation
-    console.log('New Deal action for contact', contactId);
+    setShowNewDeal(true);
+  };
+
+  const handleCreateSuccess = (newDeal) => {
+    setShowNewDeal(false);
+    if (newDeal?.id) {
+      refresh();
+      navigate(`/deals/${newDeal.id}`);
+    }
   };
 
   const handleLogActivity = () => {
-    console.log('Log Activity action for contact', contactId);
+    navigate(`/contacts/${contactId}/activity/new`);
   };
 
   const handleEdit = () => {
@@ -82,7 +92,7 @@ export default function ContactDetail() {
     console.log('Archive contact', contactId);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (contact?.notes != null) {
       setNotesValue(contact.notes);
     }
@@ -141,7 +151,7 @@ export default function ContactDetail() {
                     + New Deal
                   </button>
                 </div>
-                <DealsList deals={deals} onDealClick={(deal) => console.log('Open deal', deal.id)} />
+                <DealsList deals={deals} onDealClick={(deal) => navigate(`/deals/${deal.id}`)} />
               </div>
             ) : (
               <div className="space-y-4">
@@ -269,6 +279,9 @@ export default function ContactDetail() {
           </div>
         </aside>
       </div>
+      {showNewDeal && (
+        <NewDealModal onClose={() => setShowNewDeal(false)} onCreated={handleCreateSuccess} initialContactId={contactId} />
+      )}
     </div>
   );
 }

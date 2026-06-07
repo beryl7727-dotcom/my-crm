@@ -11,6 +11,7 @@ import CreateTeam from './pages/auth/CreateTeam';
 
 // Dashboard page
 import Dashboard from './pages/Dashboard';
+import Contacts from './pages/Contacts';
 import ContactDetail from './pages/ContactDetail';
 
 function App() {
@@ -30,6 +31,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/contacts"
+              element={
+                <ProtectedRoute>
+                  <Contacts />
                 </ProtectedRoute>
               }
             />

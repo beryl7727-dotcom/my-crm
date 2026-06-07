@@ -25,7 +25,7 @@ export default function ContactHeader({ contact, activeTab, onTabChange, onNewDe
             </div>
             <div className="grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
               {contact.title && <p>{contact.title}</p>}
-              {contact.company && <p>{contact.company}</p>}
+              {contact.company_name && <p>{contact.company_name}</p>}
               {contact.email && <p>{contact.email}</p>}
               {contact.phone && <p>{contact.phone}</p>}
             </div>
