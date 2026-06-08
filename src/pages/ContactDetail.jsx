@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import ContactHeader from '../components/ContactHeader';
 import NewDealModal from '../components/modals/NewDealModal';
+import EditDealModal from '../components/modals/EditDealModal';
+import LogActivityModal from '../components/modals/LogActivityModal';
 import DealsList from '../components/DealsList';
 import ActivityTimeline from '../components/ActivityTimeline';
 import { useContactDetail } from '../hooks/useContactDetail';
@@ -15,8 +17,10 @@ const formatDate = (value) => {
 export default function ContactDetail() {
   const { id } = useParams();
   const contactId = id;
-  const [activeTab, setActiveTab] = useState('deals');
+  const [activeTab, setActiveTab] = useState('relationships');
   const [showNewDeal, setShowNewDeal] = useState(false);
+  const [showLogActivity, setShowLogActivity] = useState(false);
+  const [selectedDeal, setSelectedDeal] = useState(null);
   const [activityFilter, setActivityFilter] = useState('all');
   const [notesEditing, setNotesEditing] = useState(false);
   const [notesValue, setNotesValue] = useState('');
@@ -31,20 +35,17 @@ export default function ContactDetail() {
     updateContactNotes,
     updateContactTags,
   } = useContactDetail(contactId);
-  const navigate = useNavigate();
 
   const filteredActivities = useMemo(() => {
     if (!activities) return [];
     if (activityFilter === 'all') return activities;
-    return activities.filter((activity) => activity.type === activityFilter);
+    return activities.filter((activity) => activity.activity_type === activityFilter);
   }, [activities, activityFilter]);
 
   const stats = useMemo(() => {
     const dealCount = deals?.length || 0;
-    const totalValue = deals
-      ?.filter((deal) => deal.stage?.toLowerCase() !== 'closed_lost')
-      .reduce((sum, deal) => sum + (Number(deal.amount) || 0), 0) || 0;
-    const lastActivity = activities?.[0]?.date_time || activities?.[0]?.created_at || null;
+    const totalValue = deals?.reduce((sum, deal) => sum + (Number(deal.value) || 0), 0) || 0;
+    const lastActivity = activities?.[0]?.activity_date || activities?.[0]?.created_at || null;
     return { dealCount, totalValue, lastActivity };
   }, [deals, activities]);
 
@@ -72,16 +73,23 @@ export default function ContactDetail() {
     setShowNewDeal(true);
   };
 
-  const handleCreateSuccess = (newDeal) => {
+  const handleCreateSuccess = () => {
     setShowNewDeal(false);
-    if (newDeal?.id) {
-      refresh();
-      navigate(`/deals/${newDeal.id}`);
-    }
+    refresh();
   };
 
   const handleLogActivity = () => {
-    navigate(`/contacts/${contactId}/activity/new`);
+    setShowLogActivity(true);
+  };
+
+  const handleActivityLogged = () => {
+    setShowLogActivity(false);
+    refresh();
+  };
+
+  const handleDealUpdated = () => {
+    setSelectedDeal(null);
+    refresh();
   };
 
   const handleEdit = () => {
@@ -140,18 +148,18 @@ export default function ContactDetail() {
           />
 
           <div className="rounded-3xl border border-slate-200 bg-white p-5">
-            {activeTab === 'deals' ? (
+            {activeTab === 'relationships' ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-4">
-                  <h3 className="text-lg font-semibold">Deals</h3>
+                  <h3 className="text-lg font-semibold">Relationships</h3>
                   <button
                     onClick={handleNewDeal}
                     className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                   >
-                    + New Deal
+                    + New Relationship
                   </button>
                 </div>
-                <DealsList deals={deals} onDealClick={(deal) => navigate(`/deals/${deal.id}`)} />
+                <DealsList deals={deals} onDealClick={(deal) => setSelectedDeal(deal)} />
               </div>
             ) : (
               <div className="space-y-4">
@@ -189,11 +197,11 @@ export default function ContactDetail() {
             <h3 className="text-lg font-semibold mb-4">Quick Stats</h3>
             <div className="space-y-3">
               <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-sm text-slate-500">Deals</p>
+                <p className="text-sm text-slate-500">Relationships</p>
                 <p className="mt-1 text-2xl font-semibold">{stats.dealCount}</p>
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-sm text-slate-500">Pipeline Value</p>
+                <p className="text-sm text-slate-500">Total Value</p>
                 <p className="mt-1 text-2xl font-semibold">${stats.totalValue.toLocaleString()}</p>
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
@@ -281,6 +289,12 @@ export default function ContactDetail() {
       </div>
       {showNewDeal && (
         <NewDealModal onClose={() => setShowNewDeal(false)} onCreated={handleCreateSuccess} initialContactId={contactId} />
+      )}
+      {showLogActivity && (
+        <LogActivityModal contactId={contactId} onClose={() => setShowLogActivity(false)} onLogged={handleActivityLogged} />
+      )}
+      {selectedDeal && (
+        <EditDealModal deal={selectedDeal} onClose={() => setSelectedDeal(null)} onUpdated={handleDealUpdated} />
       )}
     </div>
   );

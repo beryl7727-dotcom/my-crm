@@ -1,24 +1,23 @@
 import React, { useState } from 'react';
 import { toast } from '../../utils/toast';
 import { useDealMutations } from '../../hooks/useDealMutations';
-
-const STAGES = ['Prospect', 'Qualified', 'Proposal', 'Closed'];
+import { STAGES, STAGE_LABELS, STAGE_COLORS } from '../../utils/relationshipStages';
 
 export default function MoveDealModal({ deal, onClose, onSuccess }) {
   const { moveDeal } = useDealMutations();
-  const [selectedStage, setSelectedStage] = useState(deal?.stage || 'Prospect');
+  const [selectedStage, setSelectedStage] = useState(deal?.stage || 'relationship');
   const [isSaving, setIsSaving] = useState(false);
 
   const handleConfirm = async () => {
     try {
       setIsSaving(true);
       const updated = await moveDeal(deal.id, selectedStage);
-      toast.success(`Deal moved to ${selectedStage}`);
+      toast.success(`Relationship moved to ${STAGE_LABELS[selectedStage] || selectedStage}`);
       onSuccess && onSuccess(updated);
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Failed to move deal');
+      toast.error(err.message || 'Failed to move relationship');
     } finally {
       setIsSaving(false);
     }
@@ -29,29 +28,32 @@ export default function MoveDealModal({ deal, onClose, onSuccess }) {
       <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold">Move Deal</h2>
-            <p className="text-sm text-slate-500">Select the new stage for this deal.</p>
+            <h2 className="text-2xl font-semibold">Move Relationship</h2>
+            <p className="text-sm text-slate-500">Select the new stage for this relationship.</p>
           </div>
           <button onClick={onClose} className="text-slate-500 hover:text-slate-900">
             Close
           </button>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-4">
-          {STAGES.map((stage) => (
-            <button
-              key={stage}
-              type="button"
-              onClick={() => setSelectedStage(stage)}
-              className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
-                selectedStage === stage
-                  ? 'border-blue-600 bg-blue-600 text-white'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-              }`}
-            >
-              {stage}
-            </button>
-          ))}
+        <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-5">
+          {STAGES.map((stage) => {
+            const colors = STAGE_COLORS[stage];
+            return (
+              <button
+                key={stage}
+                type="button"
+                onClick={() => setSelectedStage(stage)}
+                className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
+                  selectedStage === stage
+                    ? `border-transparent ${colors.solid}`
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                {STAGE_LABELS[stage]}
+              </button>
+            );
+          })}
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
@@ -68,7 +70,7 @@ export default function MoveDealModal({ deal, onClose, onSuccess }) {
             disabled={isSaving}
             className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSaving ? 'Moving...' : `Move to ${selectedStage}`}
+            {isSaving ? 'Moving...' : `Move to ${STAGE_LABELS[selectedStage]}`}
           </button>
         </div>
       </div>

@@ -24,7 +24,7 @@ export default function ContactHeader({ contact, activeTab, onTabChange, onNewDe
               <h1 className="text-3xl font-semibold text-slate-900">{fullName || contact.company || 'Unnamed Contact'}</h1>
             </div>
             <div className="grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
-              {contact.title && <p>{contact.title}</p>}
+              {contact.job_title && <p>{contact.job_title}</p>}
               {contact.company_name && <p>{contact.company_name}</p>}
               {contact.email && <p>{contact.email}</p>}
               {contact.phone && <p>{contact.phone}</p>}
@@ -38,7 +38,7 @@ export default function ContactHeader({ contact, activeTab, onTabChange, onNewDe
             onClick={onNewDeal}
             className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
           >
-            + New Deal
+            + New Relationship
           </button>
           <button
             type="button"
@@ -65,7 +65,7 @@ export default function ContactHeader({ contact, activeTab, onTabChange, onNewDe
       </div>
 
       <div className="mt-6 flex flex-wrap gap-2 border-t border-slate-200 pt-5">
-        {['deals', 'activity'].map((tab) => (
+        {['relationships', 'activity'].map((tab) => (
           <button
             key={tab}
             type="button"
@@ -74,7 +74,7 @@ export default function ContactHeader({ contact, activeTab, onTabChange, onNewDe
               activeTab === tab ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            {tab === 'deals' ? 'Deals' : 'Activity'}
+            {tab === 'relationships' ? 'Relationships' : 'Activity'}
           </button>
         ))}
       </div>

@@ -118,9 +118,9 @@ export default function ContactTable({
                 <td className="px-4 py-4 text-slate-700">{contact.company_name || '—'}</td>
                 <td className="px-4 py-4 text-slate-700" onClick={(e) => e.stopPropagation()}>
                   <EditableCell
-                    value={contact.title || '—'}
-                    isEditing={isEditingRow && editingState.field === 'title'}
-                    onStartEdit={() => startEditing(contact, 'title')}
+                    value={contact.job_title || '—'}
+                    isEditing={isEditingRow && editingState.field === 'job_title'}
+                    onStartEdit={() => startEditing(contact, 'job_title')}
                     onChange={setEditingValue}
                     onSave={saveEditing}
                     onCancel={stopEditing}

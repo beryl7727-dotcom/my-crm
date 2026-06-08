@@ -20,7 +20,7 @@ const formatDateTime = (value) => {
 };
 
 export default function ActivityItem({ activity }) {
-  const icon = iconMap[activity.type] || '🔔';
+  const icon = iconMap[activity.activity_type] || '🔔';
   const createdBy = activity.created_by?.name || activity.created_by || 'Unknown';
 
   return (
@@ -31,14 +31,14 @@ export default function ActivityItem({ activity }) {
         </div>
         <div className="space-y-1 text-sm">
           <p className="font-semibold text-slate-900">{activity.title || 'Untitled activity'}</p>
-          <p className="text-slate-500">{formatDateTime(activity.date_time || activity.created_at)}</p>
+          <p className="text-slate-500">{formatDateTime(activity.activity_date || activity.created_at)}</p>
         </div>
       </div>
       <div className="mt-3 text-sm text-slate-700">
         <p>{activity.description || 'No details provided.'}</p>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-        <span className="rounded-full bg-white px-2 py-1">{activity.type || 'activity'}</span>
+        <span className="rounded-full bg-white px-2 py-1">{activity.activity_type || 'activity'}</span>
         <span>By {createdBy}</span>
       </div>
     </div>

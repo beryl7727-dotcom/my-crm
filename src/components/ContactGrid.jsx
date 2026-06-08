@@ -30,7 +30,7 @@ export default function ContactGrid({ contacts, onContactClick, selectedIds, onT
             </div>
           </div>
           <div className="mt-4 space-y-2 text-sm text-slate-600">
-            <p>{contact.title || 'No title'}</p>
+            <p>{contact.job_title || 'No title'}</p>
             <p>{contact.email || 'No email'}</p>
           </div>
         </div>

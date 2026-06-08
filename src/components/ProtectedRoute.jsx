@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useTeam } from '../hooks/useTeam';
+import AppLayout from './AppLayout';
 
 export default function ProtectedRoute({ children }) {
   const { user, loading: authLoading } = useAuth();
@@ -25,5 +26,5 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/auth/create-team" />;
   }
 
-  return children;
+  return <AppLayout>{children}</AppLayout>;
 }

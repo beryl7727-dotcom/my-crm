@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useTeam } from './useTeam';
 
 export function useContactDetail(contactId) {
   const [contact, setContact] = useState(null);
@@ -9,25 +10,24 @@ export function useContactDetail(contactId) {
   const [error, setError] = useState(null);
 
   const sortDeals = (items) => {
-    const openStatuses = ['prospect', 'qualified', 'proposal', 'open'];
     return [...items].sort((a, b) => {
-      const aOpen = !['closed', 'closed_lost'].includes((a.stage || '').toLowerCase());
-      const bOpen = !['closed', 'closed_lost'].includes((b.stage || '').toLowerCase());
-      if (aOpen !== bOpen) return aOpen ? -1 : 1;
       return new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0);
     });
   };
 
   const sortActivities = (items) => {
     return [...items].sort((a, b) => {
-      const aDate = new Date(a.date_time || a.created_at || 0);
-      const bDate = new Date(b.date_time || b.created_at || 0);
+      const aDate = new Date(a.activity_date || a.created_at || 0);
+      const bDate = new Date(b.activity_date || b.created_at || 0);
       return bDate - aDate;
     });
   };
 
+  const { currentTeam } = useTeam();
+  const teamId = currentTeam?.id;
+
   const fetchContactDetail = useCallback(async () => {
-    if (!contactId) {
+    if (!contactId || !teamId) {
       setContact(null);
       setDeals([]);
       setActivities([]);
@@ -40,9 +40,9 @@ export function useContactDetail(contactId) {
 
     try {
       const [contactRes, dealsRes, activitiesRes] = await Promise.all([
-        supabase.from('contacts').select('*').eq('id', contactId).maybeSingle(),
-        supabase.from('deals').select('*').eq('contact_id', contactId),
-        supabase.from('activities').select('*').eq('contact_id', contactId),
+        supabase.from('contacts').select('*').eq('id', contactId).eq('team_id', teamId).maybeSingle(),
+        supabase.from('relationships').select('*').eq('primary_contact_id', contactId).eq('team_id', teamId),
+        supabase.from('activities').select('*').eq('contact_id', contactId).eq('team_id', teamId),
       ]);
 
       if (contactRes.error) throw contactRes.error;

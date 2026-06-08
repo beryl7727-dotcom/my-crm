@@ -1,21 +1,27 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { supabase } from '../../lib/supabase';
 import { toast } from '../../utils/toast';
 import { useDealMutations } from '../../hooks/useDealMutations';
-import { validateDealRequired } from '../../utils/dealValidation';
+import { validateDealRequired, dealRules } from '../../utils/dealValidation';
+import { STAGES, STAGE_LABELS, CONTACT_TYPES, NEXT_ACTION_TYPES } from '../../utils/relationshipStages';
 
 export default function NewDealModal({ onClose, onCreated, initialContactId = null }) {
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm({
     defaultValues: {
       title: '',
       company_id: '',
-      contact_id: initialContactId || '',
-      amount: '',
-      stage: 'prospect',
+      primary_contact_id: initialContactId || '',
+      value: '',
+      stage: 'relationship',
       probability: 0,
       expected_close_date: '',
       description: '',
+      contact_type: '',
+      relationship_score: '',
+      last_contact_date: '',
+      next_action_type: '',
+      next_contact_date: '',
     }
   });
 
@@ -43,7 +49,7 @@ export default function NewDealModal({ onClose, onCreated, initialContactId = nu
   }, []);
 
   useEffect(() => {
-    if (initialContactId) setValue('contact_id', initialContactId);
+    if (initialContactId) setValue('primary_contact_id', initialContactId);
   }, [initialContactId, setValue]);
 
   const onSubmit = async (values) => {
@@ -57,21 +63,26 @@ export default function NewDealModal({ onClose, onCreated, initialContactId = nu
       const payload = {
         title: values.title,
         company_id: values.company_id || null,
-        contact_id: values.contact_id || null,
-        amount: values.amount ? Number(values.amount) : null,
-        stage: values.stage || 'prospect',
+        primary_contact_id: values.primary_contact_id || null,
+        value: values.value ? Number(values.value) : null,
+        stage: values.stage || 'relationship',
         probability: Number(values.probability) || 0,
         expected_close_date: values.expected_close_date || null,
         description: values.description || null,
+        contact_type: values.contact_type || null,
+        relationship_score: values.relationship_score ? Number(values.relationship_score) : null,
+        last_contact_date: values.last_contact_date || null,
+        next_action_type: values.next_action_type || null,
+        next_contact_date: values.next_contact_date || null,
       };
 
       const data = await createDeal(payload);
-      toast.success('Deal created');
+      toast.success('Relationship created');
       onCreated && onCreated(data);
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Failed to create deal');
+      toast.error(err.message || 'Failed to create relationship');
     }
   };
 
@@ -80,8 +91,8 @@ export default function NewDealModal({ onClose, onCreated, initialContactId = nu
       <div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold">New Deal</h2>
-            <p className="text-sm text-slate-500">Create a new deal in the pipeline.</p>
+            <h2 className="text-2xl font-semibold">New Relationship</h2>
+            <p className="text-sm text-slate-500">Add a new relationship to the pipeline.</p>
           </div>
           <button onClick={onClose} className="text-slate-500 hover:text-slate-900">Close</button>
         </div>
@@ -106,16 +117,16 @@ export default function NewDealModal({ onClose, onCreated, initialContactId = nu
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2 text-sm font-medium text-slate-700">
               Primary contact
-              <select {...register('contact_id', { required: true })} className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
+              <select {...register('primary_contact_id', { required: true })} className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
                 <option value="">Select contact</option>
                 {contacts.map(c => <option key={c.id} value={c.id}>{c.full_name || c.id}</option>)}
               </select>
-              {errors.contact_id && <div className="text-rose-600 text-sm">Primary contact is required</div>}
+              {errors.primary_contact_id && <div className="text-rose-600 text-sm">Primary contact is required</div>}
             </label>
 
             <label className="space-y-2 text-sm font-medium text-slate-700">
               Value
-              <input {...register('amount')} type="number" step="0.01" className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+              <input {...register('value')} type="number" step="0.01" className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
             </label>
           </div>
 
@@ -123,11 +134,9 @@ export default function NewDealModal({ onClose, onCreated, initialContactId = nu
             <label className="space-y-2 text-sm font-medium text-slate-700">
               Stage
               <select {...register('stage')} className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
-                <option value="prospect">Prospect</option>
-                <option value="qualified">Qualified</option>
-                <option value="proposal">Proposal</option>
-                <option value="closed_won">Closed Won</option>
-                <option value="closed_lost">Closed Lost</option>
+                {STAGES.map((stage) => (
+                  <option key={stage} value={stage}>{STAGE_LABELS[stage]}</option>
+                ))}
               </select>
             </label>
 
@@ -139,23 +148,62 @@ export default function NewDealModal({ onClose, onCreated, initialContactId = nu
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2 text-sm font-medium text-slate-700">
-              Expected close date
-              <input {...register('expected_close_date')} type="date" className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+              Contact type
+              <select {...register('contact_type')} className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
+                <option value="">Select type</option>
+                {CONTACT_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+              </select>
             </label>
             <label className="space-y-2 text-sm font-medium text-slate-700">
-              Description
-              <textarea {...register('description')} rows={4} className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+              Relationship score
+              <select {...register('relationship_score', dealRules.relationship_score)} className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
+                <option value="">No score</option>
+                <option value="1">★☆☆☆☆ (1)</option>
+                <option value="2">★★☆☆☆ (2)</option>
+                <option value="3">★★★☆☆ (3)</option>
+                <option value="4">★★★★☆ (4)</option>
+                <option value="5">★★★★★ (5)</option>
+              </select>
             </label>
           </div>
 
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-2 text-sm font-medium text-slate-700">
+              Last contact date
+              <input {...register('last_contact_date')} type="date" className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            </label>
+            <label className="space-y-2 text-sm font-medium text-slate-700">
+              Next action
+              <select {...register('next_action_type')} className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
+                <option value="">Select action</option>
+                {NEXT_ACTION_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+              </select>
+            </label>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-2 text-sm font-medium text-slate-700">
+              Next contact date
+              <input {...register('next_contact_date')} type="date" className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            </label>
+            <label className="space-y-2 text-sm font-medium text-slate-700">
+              Expected close date
+              <input {...register('expected_close_date')} type="date" className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            </label>
+          </div>
+
+          <label className="block space-y-2 text-sm font-medium text-slate-700">
+            Description
+            <textarea {...register('description')} rows={4} className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+          </label>
+
           <div className="flex justify-end gap-3">
             <button type="button" onClick={onClose} className="rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm">Cancel</button>
-            <button type="submit" disabled={isSubmitting || loading} className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">{isSubmitting || loading ? 'Saving...' : 'Save deal'}</button>
+            <button type="submit" disabled={isSubmitting || loading} className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">{isSubmitting || loading ? 'Saving...' : 'Save relationship'}</button>
           </div>
         </form>
       </div>
     </div>
   );
-
-  }
+}
 

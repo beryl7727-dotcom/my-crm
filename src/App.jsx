@@ -13,6 +13,8 @@ import CreateTeam from './pages/auth/CreateTeam';
 import Dashboard from './pages/Dashboard';
 import Contacts from './pages/Contacts';
 import ContactDetail from './pages/ContactDetail';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -47,6 +49,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ContactDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
                 </ProtectedRoute>
               }
             />

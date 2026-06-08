@@ -2,8 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { supabase } from '../../lib/supabase';
 import { toast } from '../../utils/toast';
+import { useTeam } from '../../hooks/useTeam';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function NewContactModal({ onClose, onCreated }) {
+  const { currentTeam } = useTeam();
+  const { user } = useAuth();
   const [companies, setCompanies] = useState([]);
   const [companyQuery, setCompanyQuery] = useState('');
   const {
@@ -105,10 +109,12 @@ export default function NewContactModal({ onClose, onCreated }) {
           last_name: last_name || null,
           email: payload.email,
           phone: payload.phone,
-          title: payload.job_title,
+          job_title: payload.job_title,
           company_id: companyId || null,
           notes: payload.notes,
           tags: payload.tags,
+          team_id: currentTeam?.id || null,
+          created_by: user?.id || null,
         })
         .select()
         .single();

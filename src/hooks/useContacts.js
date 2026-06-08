@@ -154,7 +154,7 @@ export function useContacts() {
         last_name,
         email: values.email || null,
         phone: values.phone || null,
-        title: values.job_title || null,
+        job_title: values.job_title || null,
         notes: values.notes || null,
         company_id: companyId || null,
         tags: values.tags || null,
@@ -215,7 +215,7 @@ export function useContacts() {
     const rows = contactsToExport.map((contact) => [
       contact.full_name,
       contact.company_name,
-      contact.title || '',
+      contact.job_title || '',
       contact.email || '',
       contact.phone || '',
       contact.tags.join(', '),

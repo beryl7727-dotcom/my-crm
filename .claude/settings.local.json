@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx eslint *)",
+      "Bash(npm run *)",
+      "Bash(npx --yes playwright --version)",
+      "Bash(powershell -Command \"Test-Path 'D:\\\\bark'; Test-Path 'D:\\\\workforce-intel'; Get-Item 'D:\\\\transcribe_temp.py' | Select-Object DirectoryName\")"
+    ]
+  }
+}
