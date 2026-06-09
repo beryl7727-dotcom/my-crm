@@ -37,6 +37,9 @@ const COLUMN_MAP = {
   'next_touch_date': 'next_touch_date',
   stage: 'stage',
   'contact stage': 'stage',
+  'relationship score': 'relationship_score',
+  'relationship_score': 'relationship_score',
+  score: 'relationship_score',
 };
 
 function parseCSV(text) {
@@ -95,6 +98,7 @@ const FIELD_OPTIONS = [
   { value: 'priority', label: 'Priority' },
   { value: 'stage', label: 'Stage' },
   { value: 'region', label: 'Region' },
+  { value: 'relationship_score', label: 'Relationship Score' },
   { value: 'next_touch_date', label: 'Next Touch Date' },
   { value: 'tags', label: 'Tags' },
 ];
@@ -160,8 +164,11 @@ export default function ImportContactsModal({ onClose, onImport }) {
     }
     setImporting(true);
     try {
-      await onImport(contactRows);
-      toast.success(`Imported ${contactRows.length} contact${contactRows.length !== 1 ? 's' : ''}`);
+      const result = await onImport(contactRows);
+      const count = result?.contacts?.length ?? contactRows.length;
+      const coCount = result?.companiesCreated ?? 0;
+      const coMsg = coCount > 0 ? `, ${coCount} compan${coCount === 1 ? 'y' : 'ies'} linked` : '';
+      toast.success(`Imported ${count} contact${count !== 1 ? 's' : ''}${coMsg}`);
       onClose();
     } catch (err) {
       toast.error(err.message || 'Import failed');
@@ -196,7 +203,7 @@ export default function ImportContactsModal({ onClose, onImport }) {
             <p className="text-lg font-semibold text-slate-700">Drop a CSV file here</p>
             <p className="mt-1 text-sm text-slate-500">or click to browse</p>
             <p className="mt-3 text-xs text-slate-400">
-              Columns detected automatically: Name, Email, Phone, Company, Title, Contact Type, Source, Tags
+              Auto-detected columns: Name, Email, Phone, Company, Title, Contact Type, Source, Priority, Stage, Region, Score, Tags
             </p>
             <input
               ref={fileRef}
@@ -215,8 +222,11 @@ export default function ImportContactsModal({ onClose, onImport }) {
               {rows.length} rows found. Map each CSV column to a contact field.
             </p>
             <div className="rounded-2xl bg-slate-50 border border-slate-200 px-4 py-3 text-xs text-slate-500 space-y-1">
-              <p><span className="font-semibold text-slate-700">Contact Type values:</span> {CONTACT_TYPE_VALUES.join(' · ')}</p>
-              <p><span className="font-semibold text-slate-700">Source values:</span> {SOURCE_VALUES.join(' · ')}</p>
+              <p><span className="font-semibold text-slate-700">Contact Type:</span> {CONTACT_TYPE_VALUES.join(' · ')}</p>
+              <p><span className="font-semibold text-slate-700">Source:</span> {SOURCE_VALUES.join(' · ')}</p>
+              <p><span className="font-semibold text-slate-700">Priority:</span> A+ · A · B · C</p>
+              <p><span className="font-semibold text-slate-700">Stage:</span> Relationship · Discovery · Structuring · Execution · Refresh</p>
+              <p><span className="font-semibold text-slate-700">Score:</span> 1 · 2 · 3 · 4 · 5 — Company names are auto-created if not found.</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {headers.map((header, idx) => (

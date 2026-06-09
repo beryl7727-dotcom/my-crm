@@ -221,14 +221,44 @@ export function useContacts() {
       const withValue = (obj) =>
         Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== '' && v !== undefined));
 
+      // ── Step 1: collect unique company names from the CSV ──────────────────
+      const uniqueNames = [
+        ...new Set(rows.map((r) => (r.company_name || '').trim()).filter(Boolean)),
+      ];
+
+      // ── Step 2: fetch companies that already exist ─────────────────────────
+      const companyIdMap = {}; // lower-case name → id
+      if (uniqueNames.length > 0) {
+        const q = supabase.from('companies').select('id,name').in('name', uniqueNames);
+        if (teamId) q.eq('team_id', teamId);
+        const { data: existing } = await q;
+        (existing || []).forEach((c) => { companyIdMap[c.name.toLowerCase()] = c.id; });
+
+        // ── Step 3: create missing companies ──────────────────────────────────
+        const missing = uniqueNames.filter((n) => !companyIdMap[n.toLowerCase()]);
+        if (missing.length > 0) {
+          const { data: created } = await supabase
+            .from('companies')
+            .insert(missing.map((name) => ({ name, team_id: teamId })))
+            .select('id,name');
+          (created || []).forEach((c) => { companyIdMap[c.name.toLowerCase()] = c.id; });
+        }
+      }
+
+      // ── Step 4: build contact payloads ─────────────────────────────────────
       const payloads = rows.map((row) => {
         const { first_name, last_name } = splitName(row.full_name || row.name || '');
+        const companyName = (row.company_name || '').trim();
+        const company_id = companyName ? (companyIdMap[companyName.toLowerCase()] || null) : null;
+        const score = row.relationship_score ? Number(row.relationship_score) : null;
+
         return {
           first_name: first_name || null,
           last_name: last_name || null,
           email: row.email || null,
           phone: row.phone || null,
           job_title: row.job_title || null,
+          company_id,
           tags: row.tags ? row.tags.split(',').map((t) => t.trim()).filter(Boolean) : null,
           team_id: teamId || null,
           created_by: user?.id || null,
@@ -237,15 +267,20 @@ export function useContacts() {
             source: row.source || null,
             priority: row.priority || null,
             region: row.region || null,
-            next_touch_date: row.next_touch_date || null,
             stage: row.stage || null,
+            next_touch_date: row.next_touch_date || null,
+            relationship_score: score && score >= 1 && score <= 5 ? score : null,
           }),
         };
       });
+
       const { data, error } = await supabase.from('contacts').insert(payloads).select();
       if (error) throw error;
       await fetchContacts();
-      return data || [];
+      return {
+        contacts: data || [],
+        companiesCreated: Object.keys(companyIdMap).length,
+      };
     },
     [fetchContacts, teamId, user]
   );
