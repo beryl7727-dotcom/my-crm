@@ -4,6 +4,9 @@ import { supabase } from '../../lib/supabase';
 import { toast } from '../../utils/toast';
 import { useTeam } from '../../hooks/useTeam';
 import { useAuth } from '../../hooks/useAuth';
+import { CONTACT_TYPES } from '../../utils/relationshipStages';
+
+const SOURCE_OPTIONS = ['LinkedIn','Referral','Conference / Event','Cold Outreach','Existing Client','Partner / Broker','Website','Other'];
 
 export default function NewContactModal({ onClose, onCreated }) {
   const { currentTeam } = useTeam();
@@ -23,6 +26,8 @@ export default function NewContactModal({ onClose, onCreated }) {
       company_id: '',
       company_name: '',
       job_title: '',
+      contact_type: '',
+      source: '',
       notes: '',
       tags: '',
     },
@@ -111,6 +116,8 @@ export default function NewContactModal({ onClose, onCreated }) {
           phone: payload.phone,
           job_title: payload.job_title,
           company_id: companyId || null,
+          contact_type: values.contact_type || null,
+          source: values.source || null,
           notes: payload.notes,
           tags: payload.tags,
           team_id: currentTeam?.id || null,
@@ -178,6 +185,29 @@ export default function NewContactModal({ onClose, onCreated }) {
                 className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
                 placeholder="Job title"
               />
+            </label>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-2 text-sm font-medium text-slate-700">
+              Contact type
+              <select
+                {...register('contact_type')}
+                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
+              >
+                <option value="">No type</option>
+                {CONTACT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm font-medium text-slate-700">
+              Source
+              <select
+                {...register('source')}
+                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
+              >
+                <option value="">Unknown</option>
+                {SOURCE_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
             </label>
           </div>
 

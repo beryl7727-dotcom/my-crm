@@ -46,6 +46,7 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
     job_title: '', company_id: '', country: '',
     notes: '', tags: '',
     contact_type: '',
+    source: '',
     relationship_score: 0,
     preferred_communication: '',
     personal_notes: '',
@@ -67,6 +68,7 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
         notes: contact.notes || '',
         tags: Array.isArray(contact.tags) ? contact.tags.join(', ') : contact.tags || '',
         contact_type: contact.contact_type || '',
+        source: contact.source || '',
         relationship_score: contact.relationship_score || 0,
         preferred_communication: contact.preferred_communication || '',
         personal_notes: contact.personal_notes || '',
@@ -100,6 +102,7 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
         notes: form.notes.trim() || null,
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
         contact_type: form.contact_type || null,
+        source: form.source || null,
         relationship_score: form.relationship_score || null,
         preferred_communication: form.preferred_communication || null,
         personal_notes: form.personal_notes.trim() || null,
@@ -199,6 +202,24 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
                     <input value={form.country} onChange={set('country')}
                       className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
                       placeholder="Country" />
+                  </label>
+                  <label className="space-y-1.5 text-sm font-medium text-slate-700">
+                    Contact type
+                    <select value={form.contact_type} onChange={set('contact_type')}
+                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none">
+                      <option value="">No type</option>
+                      {CONTACT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </label>
+                  <label className="space-y-1.5 text-sm font-medium text-slate-700">
+                    Source
+                    <select value={form.source} onChange={set('source')}
+                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none">
+                      <option value="">Unknown</option>
+                      {['LinkedIn','Referral','Conference / Event','Cold Outreach','Existing Client','Partner / Broker','Website','Other'].map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
                   </label>
                   <label className="space-y-1.5 text-sm font-medium text-slate-700 md:col-span-2">
                     Company
