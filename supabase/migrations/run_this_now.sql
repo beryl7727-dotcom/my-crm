@@ -19,7 +19,9 @@ alter table contacts
   add column if not exists preferred_markets   text[],
   add column if not exists preferred_volume    varchar,
   add column if not exists last_activity_date  timestamp with time zone,
-  add column if not exists segment_tags        text[];
+  add column if not exists segment_tags        text[],
+  add column if not exists do_not_contact      boolean default false,
+  add column if not exists ready_for_pipeline  boolean default false;
 
 create index if not exists idx_contacts_contact_type on contacts(contact_type);
 create index if not exists idx_contacts_source       on contacts(source);

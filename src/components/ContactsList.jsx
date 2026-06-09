@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ContactAvatar from './ContactAvatar';
 import ContactTypeIcon from './ContactTypeIcon';
 import RelationshipScoreStar from './RelationshipScoreStar';
+import PipelineCheckbox from './PipelineCheckbox';
 
 const STAGE_STYLES = {
   relationship: 'bg-blue-100 text-blue-700',
@@ -99,6 +100,7 @@ export default function ContactsList({
             <th className="px-4 py-3 text-left">Email / Phone</th>
             <SortHeader label="Last Contact" col="last_activity" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
             <th className="px-4 py-3 text-left">Relationships</th>
+            <th className="px-4 py-3 text-left" title="Check to push to pipeline; uncheck to mark Do Not Contact">Pipeline</th>
             <th className="px-4 py-3 text-left">Status</th>
             <th className="px-4 py-3 text-left">Actions</th>
           </tr>
@@ -129,8 +131,15 @@ export default function ContactsList({
                   <div className="flex items-center gap-3">
                     <ContactAvatar name={contact.full_name} />
                     <div className="min-w-0">
-                      <div className="font-semibold text-slate-900 truncate">
-                        {highlight(contact.full_name, searchQuery)}
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-slate-900 truncate">
+                          {highlight(contact.full_name, searchQuery)}
+                        </span>
+                        {contact.do_not_contact && (
+                          <span className="shrink-0 rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700">
+                            🚫 DNC
+                          </span>
+                        )}
                       </div>
                       {contact.job_title && (
                         <div className="text-xs text-slate-400 truncate">{contact.job_title}</div>
@@ -175,6 +184,10 @@ export default function ContactsList({
                       </span>
                     )}
                   </div>
+                </td>
+
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <PipelineCheckbox contact={contact} onUpdate={onUpdateContact} />
                 </td>
 
                 <td className="px-4 py-3">
