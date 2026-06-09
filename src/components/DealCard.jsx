@@ -1,5 +1,9 @@
 
 import { STAGE_COLORS, STAGE_LABELS, NEXT_ACTION_ICONS } from '../utils/relationshipStages';
+import { CONTACT_TYPE_META } from '../utils/relationshipProfile';
+import QuickMessageButtons from './QuickMessageButtons';
+import ContactTypeIcon from './ContactTypeIcon';
+import RelationshipScoreStar from './RelationshipScoreStar';
 
 function formatDate(value) {
   if (!value) return '—';
@@ -24,23 +28,10 @@ function formatCurrency(amount) {
   return '$' + n;
 }
 
-function ScoreStars({ score }) {
-  const filled = Math.max(0, Math.min(5, Number(score) || 0));
-  if (!filled) return <span className="text-xs text-slate-400">No score</span>;
-  const filledStars = '★'.repeat(filled);
-  const emptyStars = '★'.repeat(5 - filled);
-  return (
-    <span className="text-sm leading-none tracking-tight" title={'Relationship score: ' + filled + '/5'}>
-      <span className="text-amber-400">{filledStars}</span>
-      <span className="text-slate-300">{emptyStars}</span>
-    </span>
-  );
-}
-
 import { DEFAULT_CARD_FIELDS } from '../utils/cardFields';
 export { DEFAULT_CARD_FIELDS };
 
-export default function DealCard({ deal, onOpen, visibleFields = DEFAULT_CARD_FIELDS }) {
+export default function DealCard({ deal, onOpen, onQuickMessage, visibleFields = DEFAULT_CARD_FIELDS }) {
   const show = (key) => visibleFields[key] !== false;
 
   const handleDragStart = (e) => {
@@ -66,15 +57,21 @@ export default function DealCard({ deal, onOpen, visibleFields = DEFAULT_CARD_FI
     show('value') && { label: 'Value', value: formatCurrency(deal.value) },
   ].filter(Boolean);
 
+  const typeMeta = CONTACT_TYPE_META[deal.contact_type];
+  const tintClasses = typeMeta ? `${typeMeta.colors.bg} ${typeMeta.colors.border}` : 'bg-white border-gray-200';
+
   return (
     <div
       draggable
       onDragStart={handleDragStart}
       onClick={() => onOpen && onOpen(deal)}
-      className="bg-white border border-gray-200 hover:border-blue-300 p-3 rounded-md cursor-pointer shadow-sm hover:shadow-md transition"
+      className={`${tintClasses} hover:border-blue-300 p-3 rounded-md cursor-pointer shadow-sm hover:shadow-md transition border`}
     >
       <div className="flex items-start justify-between gap-2">
-        <h5 className="font-semibold text-sm text-slate-900">{contactName || 'No contact'}</h5>
+        <div className="flex min-w-0 items-center gap-1.5">
+          <ContactTypeIcon type={deal.contact_type} size="sm" />
+          <h5 className="truncate font-semibold text-sm text-slate-900">{contactName || 'No contact'}</h5>
+        </div>
         <span
           className={'mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full ' + colors.dot}
           title={STAGE_LABELS[deal.stage] || deal.stage}
@@ -87,7 +84,7 @@ export default function DealCard({ deal, onOpen, visibleFields = DEFAULT_CARD_FI
 
       {show('score') && (
         <div className="mt-1">
-          <ScoreStars score={deal.relationship_score} />
+          <RelationshipScoreStar score={deal.relationship_score} readOnly size="sm" />
         </div>
       )}
 
@@ -101,6 +98,17 @@ export default function DealCard({ deal, onOpen, visibleFields = DEFAULT_CARD_FI
               </div>
             );
           })}
+        </div>
+      )}
+
+      {deal.contact && onQuickMessage && (
+        <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-2">
+          <span className="text-xs text-slate-400">Quick message</span>
+          <QuickMessageButtons
+            contact={deal.contact}
+            deal={deal}
+            onSelectChannel={onQuickMessage}
+          />
         </div>
       )}
     </div>

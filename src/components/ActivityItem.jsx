@@ -1,10 +1,12 @@
 import React from 'react';
+import { CHANNEL_META } from '../utils/messageTemplates';
 
 const iconMap = {
   call: '📞',
   email: '✉️',
   note: '📝',
   meeting: '📅',
+  message: '💬',
 };
 
 const formatDateTime = (value) => {
@@ -20,7 +22,7 @@ const formatDateTime = (value) => {
 };
 
 export default function ActivityItem({ activity }) {
-  const icon = iconMap[activity.activity_type] || '🔔';
+  const icon = (activity.message_channel && CHANNEL_META[activity.message_channel]?.icon) || iconMap[activity.activity_type] || '🔔';
   const createdBy = activity.created_by?.name || activity.created_by || 'Unknown';
 
   return (

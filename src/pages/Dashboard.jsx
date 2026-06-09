@@ -1,28 +1,47 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTeam } from '../hooks/useTeam';
 import useDealPipeline from '../hooks/useDealPipeline';
+import { useFollowUpsDue } from '../hooks/useFollowUpsDue';
+import { useStructuringDeals } from '../hooks/useStructuringDeals';
+import { usePriorityCompanies } from '../hooks/usePriorityCompanies';
+import { useExecutedThisMonth } from '../hooks/useExecutedThisMonth';
 import StatCard from '../components/StatCard';
 import KanbanBoard from '../components/KanbanBoard';
+import PriorityCompanies from '../components/PriorityCompanies';
+import FollowUpsList from '../components/FollowUpsList';
+import StructuringDealsList from '../components/StructuringDealsList';
 import NewDealModal from '../components/modals/NewDealModal';
-import { formatCurrency } from '../utils/formatters';
+import MessageComposer from '../components/modals/MessageComposer';
+import { useTemplates } from '../hooks/useTemplates';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { currentTeam, loading: teamLoading } = useTeam();
-  const [selectedDeal, setSelectedDeal] = useState(null);
   const [showNewDeal, setShowNewDeal] = useState(false);
+  const [quickMessage, setQuickMessage] = useState(null);
+  const [showFollowUps, setShowFollowUps] = useState(false);
+  const [showStructuring, setShowStructuring] = useState(false);
 
   const teamId = currentTeam?.id || null;
-  const { stages, stageLabels, dealsByStage, totals, loading, moveDeal, refresh } = useDealPipeline(teamId);
+  const { stages, stageLabels, dealsByStage, loading: pipelineLoading, moveDeal, refresh } = useDealPipeline(teamId);
+  const { deals: followUpDeals, count: followUpCount, loading: followUpsLoading } = useFollowUpsDue();
+  const { deals: structuringDeals, count: structuringCount, loading: structuringLoading } = useStructuringDeals();
+  const { companies, loading: companiesLoading } = usePriorityCompanies();
+  const { count: executedCount, totalValue: executedValue, loading: executedLoading } = useExecutedThisMonth();
+  const { templates } = useTemplates();
 
-  const handleOpenDeal = (deal) => setSelectedDeal(deal);
-  const handleCloseDeal = () => setSelectedDeal(null);
+  const handleOpenDeal = (deal) => navigate(`/relationships/${deal.id}`);
+  const handleQuickMessage = ({ contact, deal, channel }) => setQuickMessage({ contact, deal, channel });
 
   const handleNewDeal = async () => {
     setShowNewDeal(false);
     await refresh();
   };
 
-  if (teamLoading || loading) {
+  const kpisLoading = followUpsLoading || structuringLoading || executedLoading;
+
+  if (teamLoading || pipelineLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin">
@@ -34,14 +53,43 @@ export default function Dashboard() {
 
   return (
     <div className="p-6">
-      <header className="mb-6">
-        <div className="flex gap-4 flex-wrap">
-          <StatCard title="Total Contacts" value={totals.totalContacts} />
-          <StatCard title="Active Relationships" value={totals.activeRelationships} />
-          <StatCard title="Potential Value" value={formatCurrency(totals.potentialValue)} />
-          <StatCard title="Executed This Month" value={formatCurrency(totals.executedThisMonth)} />
+      <header className="mb-6 space-y-4">
+        {/* Row 1 — KPI stat cards */}
+        <div className="flex flex-wrap gap-4">
+          <StatCard
+            title="Follow-Ups Due This Month"
+            value={kpisLoading ? '…' : String(followUpCount)}
+            subtitle="Discovery-stage, 7+ days overdue"
+            color="orange"
+            onClick={() => setShowFollowUps(true)}
+          />
+          <StatCard
+            title="Deals in Structuring"
+            value={kpisLoading ? '…' : String(structuringCount)}
+            subtitle="Commercial terms being formed"
+            color="purple"
+            onClick={() => setShowStructuring(true)}
+          />
+          <StatCard
+            title="Executed This Month"
+            value={kpisLoading ? '…' : executedValue}
+            subtitle={`${executedCount} ${executedCount === 1 ? 'relationship' : 'relationships'} executed`}
+            color="green"
+          />
         </div>
-        <div className="mt-4 flex justify-between items-center">
+
+        {/* Row 2 — Priority companies */}
+        {!companiesLoading && (
+          <div>
+            <p className="mb-2 text-sm font-semibold text-slate-500">Priority Companies (Structuring)</p>
+            <PriorityCompanies
+              companies={companies}
+              onCompanyClick={() => setShowStructuring(true)}
+            />
+          </div>
+        )}
+
+        <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Relationship Pipeline</h2>
           <div className="flex items-center gap-2">
             <button
@@ -67,33 +115,34 @@ export default function Dashboard() {
           dealsByStage={dealsByStage}
           onMove={moveDeal}
           onOpenDeal={handleOpenDeal}
+          onQuickMessage={handleQuickMessage}
         />
       </main>
 
-      {/* Relationship detail panel */}
-      {selectedDeal && (
-        <div className="fixed inset-0 bg-black/40 flex justify-end">
-          <div className="w-full md:w-1/3 bg-white p-6 overflow-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">{selectedDeal.title}</h3>
-              <button onClick={handleCloseDeal} className="text-gray-500">Close</button>
-            </div>
+      {showFollowUps && (
+        <FollowUpsList deals={followUpDeals} onClose={() => setShowFollowUps(false)} />
+      )}
 
-            <div className="space-y-3">
-              <p className="text-sm text-gray-600">Value: {selectedDeal.value ? formatCurrency(selectedDeal.value) : '—'}</p>
-              <p className="text-sm text-gray-600">Company: {selectedDeal.company?.name || '—'}</p>
-              <p className="text-sm text-gray-600">Contact: {selectedDeal.contact ? `${selectedDeal.contact.first_name} ${selectedDeal.contact.last_name}` : '—'}</p>
-              <p className="text-sm text-gray-600">Stage: {stageLabels[selectedDeal.stage] || selectedDeal.stage}</p>
-              <p className="text-sm text-gray-600">Description: {selectedDeal.description || '—'}</p>
-            </div>
-          </div>
-        </div>
+      {showStructuring && (
+        <StructuringDealsList deals={structuringDeals} onClose={() => setShowStructuring(false)} />
       )}
 
       {showNewDeal && (
         <NewDealModal
           onClose={() => setShowNewDeal(false)}
           onCreated={handleNewDeal}
+        />
+      )}
+
+      {quickMessage && (
+        <MessageComposer
+          contacts={quickMessage.contact ? [quickMessage.contact] : []}
+          templates={templates}
+          deal={quickMessage.deal}
+          initialContact={quickMessage.contact}
+          initialChannel={quickMessage.channel}
+          onClose={() => setQuickMessage(null)}
+          onSent={() => setQuickMessage(null)}
         />
       )}
     </div>

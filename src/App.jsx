@@ -13,6 +13,9 @@ import CreateTeam from './pages/auth/CreateTeam';
 import Dashboard from './pages/Dashboard';
 import Contacts from './pages/Contacts';
 import ContactDetail from './pages/ContactDetail';
+import RelationshipDetail from './pages/RelationshipDetail';
+import CalendarPage from './pages/CalendarPage';
+import MessagingHub from './pages/MessagingHub';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 
@@ -49,6 +52,30 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ContactDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/relationships/:id"
+              element={
+                <ProtectedRoute>
+                  <RelationshipDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <CalendarPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/messaging"
+              element={
+                <ProtectedRoute>
+                  <MessagingHub />
                 </ProtectedRoute>
               }
             />

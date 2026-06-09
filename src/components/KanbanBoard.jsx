@@ -85,7 +85,7 @@ function formatCurrency(amount) {
   return '$' + n;
 }
 
-export default function KanbanBoard({ stages = [], stageLabels = DEFAULT_LABELS, dealsByStage = {}, onMove, onOpenDeal }) {
+export default function KanbanBoard({ stages = [], stageLabels = DEFAULT_LABELS, dealsByStage = {}, onMove, onOpenDeal, onQuickMessage }) {
 
   const [visibleFields, setVisibleFields] = useState(loadFields);
 
@@ -125,6 +125,7 @@ export default function KanbanBoard({ stages = [], stageLabels = DEFAULT_LABELS,
                       key={deal.id}
                       deal={deal}
                       onOpen={function() { if (onOpenDeal) onOpenDeal(deal); }}
+                      onQuickMessage={onQuickMessage}
                       visibleFields={visibleFields}
                     />
                   );
