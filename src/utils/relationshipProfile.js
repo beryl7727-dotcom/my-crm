@@ -18,12 +18,9 @@ export const RELATIONSHIP_SCORE_MEANINGS = {
   5: 'Proven counterparty — multiple successful trades',
 };
 
-export const PRODUCT_OPTIONS = [
-  { value: 'i-rec', label: 'I-REC (International REC)' },
-  { value: 'go', label: 'GO (Guarantee of Origin)' },
-  { value: 'rec', label: 'REC (Renewable Energy Certificate)' },
-  { value: 'carbon', label: 'Carbon' },
-];
+import { ALL_PRODUCTS } from '../constants/products';
+
+export const PRODUCT_OPTIONS = ALL_PRODUCTS.map((p) => ({ value: p, label: p }));
 
 export const MARKET_OPTIONS = [
   { value: 'apac', label: 'APAC' },
@@ -39,6 +36,8 @@ export const VOLUME_OPTIONS = [
 ];
 
 export const PRODUCT_LABELS = Object.fromEntries(PRODUCT_OPTIONS.map((opt) => [opt.value, opt.label]));
+// Also export the flat list directly for components that just need product names
+export { ALL_PRODUCTS } from '../constants/products';
 export const MARKET_LABELS = Object.fromEntries(MARKET_OPTIONS.map((opt) => [opt.value, opt.label]));
 export const VOLUME_LABELS = Object.fromEntries(VOLUME_OPTIONS.map((opt) => [opt.value, opt.label]));
 

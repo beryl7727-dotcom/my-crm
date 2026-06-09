@@ -6,7 +6,7 @@ import { useDealMutations } from '../../hooks/useDealMutations';
 import { validateDealRequired, dealRules } from '../../utils/dealValidation';
 import { STAGES, STAGE_LABELS, CONTACT_TYPES, NEXT_ACTION_TYPES } from '../../utils/relationshipStages';
 
-const PRODUCTS = ['I-REC', 'GO', 'REC', 'Carbon'];
+import { ALL_PRODUCTS, TIER_PRODUCTS, PRODUCT_TIER } from '../../constants/products';
 
 function ReadOnlyField({ label, value }) {
   if (!value) return null;
@@ -224,7 +224,13 @@ export default function NewDealModal({ onClose, onCreated, initialContactId = nu
                 Product
                 <select {...register('product')} className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
                   <option value="">Select product</option>
-                  {PRODUCTS.map((p) => <option key={p} value={p}>{p}</option>)}
+                  {Object.entries(TIER_PRODUCTS).map(([tierNum, tier]) => (
+                    <optgroup key={tierNum} label={`${tier.emoji} ${tier.title}`}>
+                      {tier.products.map((p) => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
               </label>
             </div>

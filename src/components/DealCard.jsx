@@ -29,6 +29,7 @@ function formatCurrency(amount) {
 }
 
 import { DEFAULT_CARD_FIELDS } from '../utils/cardFields';
+import { PRODUCT_TIER, TIER_PRODUCTS } from '../constants/products';
 export { DEFAULT_CARD_FIELDS };
 
 export default function DealCard({ deal, onOpen, onQuickMessage, visibleFields = DEFAULT_CARD_FIELDS }) {
@@ -44,6 +45,9 @@ export default function DealCard({ deal, onOpen, onQuickMessage, visibleFields =
     ? ((deal.contact.first_name || '') + ' ' + (deal.contact.last_name || '')).trim()
     : deal.contact_name || 'No contact';
   const companyName = (deal.company && deal.company.name) || deal.company_name || null;
+  const product = deal.details?.product || null;
+  const productTierNum = product ? PRODUCT_TIER[product] : null;
+  const productTierMeta = productTierNum ? TIER_PRODUCTS[productTierNum] : null;
   const days = getDaysSince(deal.last_contact_date);
   const nextAction = deal.next_action_type;
 
@@ -72,11 +76,26 @@ export default function DealCard({ deal, onOpen, onQuickMessage, visibleFields =
           <ContactTypeIcon type={deal.contact_type} size="sm" />
           <h5 className="truncate font-semibold text-sm text-slate-900">{contactName || 'No contact'}</h5>
         </div>
-        <span
-          className={'mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full ' + colors.dot}
-          title={STAGE_LABELS[deal.stage] || deal.stage}
-        />
+        <div className="flex shrink-0 items-center gap-1.5">
+          {productTierMeta && (
+            <span
+              className={`rounded-full px-1.5 py-0.5 text-xs font-semibold ${productTierMeta.colors.badge}`}
+              title={`${productTierMeta.emoji} ${productTierMeta.title}: ${product}`}
+            >
+              {productTierMeta.emoji}
+            </span>
+          )}
+          <span
+            className={'mt-0.5 h-2.5 w-2.5 rounded-full ' + colors.dot}
+            title={STAGE_LABELS[deal.stage] || deal.stage}
+          />
+        </div>
       </div>
+      {product && (
+        <p className={`mt-0.5 text-xs font-medium ${productTierMeta ? productTierMeta.colors.text : 'text-slate-500'}`}>
+          {product}
+        </p>
+      )}
 
       {show('company') && companyName && (
         <p className="mt-0.5 text-xs text-slate-500 truncate">{companyName}</p>

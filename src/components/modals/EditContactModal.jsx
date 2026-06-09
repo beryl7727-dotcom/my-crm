@@ -3,7 +3,8 @@ import { supabase } from '../../lib/supabase';
 import { toast } from '../../utils/toast';
 import RelationshipScoreStar from '../RelationshipScoreStar';
 import { CONTACT_TYPES } from '../../utils/relationshipStages';
-import { PRODUCT_OPTIONS, MARKET_OPTIONS, VOLUME_OPTIONS } from '../../utils/relationshipProfile';
+import { MARKET_OPTIONS, VOLUME_OPTIONS } from '../../utils/relationshipProfile';
+import { TIER_PRODUCTS } from '../../constants/products';
 
 const COMM_OPTIONS = [
   { value: 'email', label: '✉️ Email' },
@@ -57,6 +58,10 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
     products_interested: [],
     preferred_markets: [],
     preferred_volume: '',
+    interest_products_tier_1: [],
+    interest_products_tier_2: [],
+    interest_products_tier_3: [],
+    focus_tier: '',
   });
 
   useEffect(() => {
@@ -83,6 +88,10 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
         products_interested: Array.isArray(contact.products_interested) ? contact.products_interested : [],
         preferred_markets: Array.isArray(contact.preferred_markets) ? contact.preferred_markets : [],
         preferred_volume: contact.preferred_volume || '',
+        interest_products_tier_1: Array.isArray(contact.interest_products_tier_1) ? contact.interest_products_tier_1 : [],
+        interest_products_tier_2: Array.isArray(contact.interest_products_tier_2) ? contact.interest_products_tier_2 : [],
+        interest_products_tier_3: Array.isArray(contact.interest_products_tier_3) ? contact.interest_products_tier_3 : [],
+        focus_tier: contact.focus_tier ?? '',
       });
     }
   }, [contact]);
@@ -117,7 +126,16 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
         relationship_score: form.relationship_score || null,
         preferred_communication: form.preferred_communication || null,
         personal_notes: form.personal_notes.trim() || null,
-        products_interested: form.products_interested,
+        interest_products_tier_1: form.interest_products_tier_1,
+        interest_products_tier_2: form.interest_products_tier_2,
+        interest_products_tier_3: form.interest_products_tier_3,
+        focus_tier: form.focus_tier ? Number(form.focus_tier) : null,
+        // Flatten all tier selections into legacy field for backward compat
+        products_interested: [
+          ...form.interest_products_tier_1,
+          ...form.interest_products_tier_2,
+          ...form.interest_products_tier_3,
+        ],
         preferred_markets: form.preferred_markets,
         preferred_volume: form.preferred_volume || null,
         ...withValue({
@@ -299,12 +317,95 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
                   </select>
                 </label>
 
-                <MultiCheckGroup
-                  label="Products interested"
-                  options={PRODUCT_OPTIONS}
-                  selected={form.products_interested}
-                  onChange={(v) => setDirect('products_interested', v)}
-                />
+                {/* Tier-based product selection */}
+                <div>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Products Interested</p>
+                  <div className="space-y-2">
+                    {Object.entries(TIER_PRODUCTS).map(([tierNum, tier]) => {
+                      const n = Number(tierNum);
+                      const fieldKey = `interest_products_tier_${n}`;
+                      const selected = form[fieldKey] || [];
+                      const toggle = (product) => {
+                        const next = selected.includes(product)
+                          ? selected.filter((p) => p !== product)
+                          : [...selected, product];
+                        setDirect(fieldKey, next);
+                      };
+                      return (
+                        <div key={n} className={`rounded-2xl border p-3 ${tier.colors.bg} ${tier.colors.border}`}>
+                          <p className={`mb-2 text-xs font-semibold ${tier.colors.text}`}>
+                            {tier.emoji} {tier.title}
+                            <span className="ml-1.5 font-normal text-slate-400">— {tier.focus}</span>
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {tier.products.map((product) => {
+                              const active = selected.includes(product);
+                              return (
+                                <button
+                                  key={product}
+                                  type="button"
+                                  onClick={() => toggle(product)}
+                                  className={`rounded-full border px-2.5 py-1 text-xs font-medium transition ${
+                                    active
+                                      ? `${tier.colors.activeBg} border-transparent text-white`
+                                      : `border-slate-300 bg-white ${tier.colors.text} hover:border-slate-400`
+                                  }`}
+                                >
+                                  {product}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Focus Tier */}
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Focus Tier</p>
+                  <p className="mb-2 text-xs text-slate-400">Which tier gets the most attention for this contact?</p>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    {Object.entries(TIER_PRODUCTS).map(([tierNum, tier]) => {
+                      const n = Number(tierNum);
+                      const active = String(form.focus_tier) === String(n);
+                      return (
+                        <label
+                          key={n}
+                          className={`flex cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-medium transition ${
+                            active
+                              ? `${tier.colors.bg} ${tier.colors.border} ${tier.colors.text}`
+                              : 'border-slate-300 bg-white text-slate-600 hover:border-slate-400'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="focus_tier"
+                            value={n}
+                            checked={active}
+                            onChange={() => setDirect('focus_tier', n)}
+                            className="h-4 w-4"
+                          />
+                          {tier.emoji} Tier {n}
+                        </label>
+                      );
+                    })}
+                    <label className={`flex cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-medium transition ${
+                      !form.focus_tier ? 'border-slate-400 bg-slate-100 text-slate-700' : 'border-slate-300 bg-white text-slate-400 hover:border-slate-400'
+                    }`}>
+                      <input
+                        type="radio"
+                        name="focus_tier"
+                        value=""
+                        checked={!form.focus_tier}
+                        onChange={() => setDirect('focus_tier', '')}
+                        className="h-4 w-4"
+                      />
+                      None
+                    </label>
+                  </div>
+                </div>
 
                 <MultiCheckGroup
                   label="Preferred markets"

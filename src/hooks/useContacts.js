@@ -96,6 +96,7 @@ const INITIAL_FILTERS = {
   contactTypes: [],
   scores: [],
   products: [],
+  tiers: [],
   markets: [],
   statuses: [],
   companyId: '',
@@ -315,9 +316,19 @@ export function useContacts() {
         // multi-select filters
         if (filters.contactTypes.length > 0 && !filters.contactTypes.includes(contact.contact_type)) return false;
         if (filters.scores.length > 0 && !filters.scores.includes(contact.relationship_score)) return false;
+        // Focus tier filter
+        if (filters.tiers && filters.tiers.length > 0) {
+          if (!filters.tiers.includes(contact.focus_tier)) return false;
+        }
+        // Product filter — check tier columns + legacy products_interested
         if (filters.products.length > 0) {
-          const cp = contact.products_interested || [];
-          if (!filters.products.some((p) => cp.includes(p))) return false;
+          const allProds = [
+            ...(contact.interest_products_tier_1 || []),
+            ...(contact.interest_products_tier_2 || []),
+            ...(contact.interest_products_tier_3 || []),
+            ...(contact.products_interested || []),
+          ];
+          if (!filters.products.some((p) => allProds.includes(p))) return false;
         }
         if (filters.markets.length > 0) {
           const cm = contact.preferred_markets || [];
@@ -344,6 +355,7 @@ export function useContacts() {
     if (filters.contactTypes.length) count++;
     if (filters.scores.length) count++;
     if (filters.products.length) count++;
+    if (filters.tiers && filters.tiers.length) count++;
     if (filters.markets.length) count++;
     if (filters.statuses.length) count++;
     if (filters.companyId) count++;

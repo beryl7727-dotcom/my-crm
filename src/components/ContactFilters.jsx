@@ -1,14 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CONTACT_TYPE_META } from '../utils/relationshipProfile';
+import { TIER_PRODUCTS } from '../constants/products';
 
 const CONTACT_TYPES = ['Trader', 'Corporate Buyer', 'Registry', 'Government', 'Media', 'Project Developer', 'Exchange'];
-
-const PRODUCTS = [
-  { value: 'i-rec', label: 'I-REC' },
-  { value: 'go', label: 'GO' },
-  { value: 'rec', label: 'REC' },
-  { value: 'carbon', label: 'Carbon' },
-];
 
 const MARKETS = [
   { value: 'apac', label: 'APAC' },
@@ -25,16 +19,13 @@ const STATUSES = [
 ];
 
 const MultiCheck = ({ label, options, selected, onChange }) => {
-  const toggle = (value) => {
-    onChange(
-      selected.includes(value) ? selected.filter((v) => v !== value) : [...selected, value]
-    );
-  };
+  const toggle = (value) =>
+    onChange(selected.includes(value) ? selected.filter((v) => v !== value) : [...selected, value]);
   return (
     <div>
       <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
       <div className="flex flex-wrap gap-2">
-        {options.map(({ value, label: optLabel, icon, color }) => {
+        {options.map(({ value, label: optLabel, icon }) => {
           const active = selected.includes(value);
           return (
             <button
@@ -83,6 +74,108 @@ const ScoreFilter = ({ selected, onChange }) => {
   );
 };
 
+// Tier-organized product filter with collapsible sections
+const TierProductFilter = ({ selectedProducts, selectedTiers, onChangeProducts, onChangeTiers }) => {
+  const [openTiers, setOpenTiers] = useState({ 1: true, 2: false, 3: false });
+
+  const toggleTier = (tierNum) =>
+    setOpenTiers((prev) => ({ ...prev, [tierNum]: !prev[tierNum] }));
+
+  const toggleProduct = (product) =>
+    onChangeProducts(
+      selectedProducts.includes(product)
+        ? selectedProducts.filter((p) => p !== product)
+        : [...selectedProducts, product]
+    );
+
+  const toggleFocusTier = (tierNum) =>
+    onChangeTiers(
+      selectedTiers.includes(tierNum)
+        ? selectedTiers.filter((t) => t !== tierNum)
+        : [...selectedTiers, tierNum]
+    );
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Products & Tier Focus</p>
+
+      {/* Tier focus quick-filter */}
+      <div className="flex gap-2">
+        {Object.entries(TIER_PRODUCTS).map(([tierNum, tier]) => {
+          const n = Number(tierNum);
+          const active = selectedTiers.includes(n);
+          return (
+            <button
+              key={n}
+              type="button"
+              onClick={() => toggleFocusTier(n)}
+              title={`${tier.title} — ${tier.focus}`}
+              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                active
+                  ? `${tier.colors.activeBg} border-transparent text-white`
+                  : `border-slate-200 bg-white ${tier.colors.text} hover:border-slate-300`
+              }`}
+            >
+              {tier.emoji} {tier.title}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Products per tier (collapsible) */}
+      <div className="space-y-2">
+        {Object.entries(TIER_PRODUCTS).map(([tierNum, tier]) => {
+          const n = Number(tierNum);
+          const open = openTiers[n];
+          const tierSelectedCount = tier.products.filter((p) => selectedProducts.includes(p)).length;
+
+          return (
+            <div key={n} className={`rounded-2xl border overflow-hidden ${tier.colors.border}`}>
+              <button
+                type="button"
+                onClick={() => toggleTier(n)}
+                className={`flex w-full items-center justify-between px-3 py-2 text-xs font-semibold ${tier.colors.bg} ${tier.colors.text}`}
+              >
+                <span>{tier.emoji} {tier.title}</span>
+                <span className="flex items-center gap-2">
+                  {tierSelectedCount > 0 && (
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${tier.colors.badge}`}>
+                      {tierSelectedCount}
+                    </span>
+                  )}
+                  <span className="text-slate-400">{open ? '▲' : '▼'}</span>
+                </span>
+              </button>
+
+              {open && (
+                <div className="flex flex-wrap gap-1.5 bg-white px-3 py-2">
+                  {tier.products.map((product) => {
+                    const active = selectedProducts.includes(product);
+                    return (
+                      <button
+                        key={product}
+                        type="button"
+                        onClick={() => toggleProduct(product)}
+                        className={`rounded-full border px-2.5 py-1 text-xs font-medium transition ${
+                          active
+                            ? `${tier.colors.activeBg} border-transparent text-white`
+                            : `border-slate-200 bg-white text-slate-600 hover:border-slate-300`
+                        }`}
+                      >
+                        {product}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 export default function ContactFilters({
   filters,
   setFilters,
@@ -113,12 +206,12 @@ export default function ContactFilters({
       {/* Score */}
       <ScoreFilter selected={filters.scores} onChange={(v) => f('scores', v)} />
 
-      {/* Products / Market Interest */}
-      <MultiCheck
-        label="Market Interest (Products)"
-        options={PRODUCTS}
-        selected={filters.products}
-        onChange={(v) => f('products', v)}
+      {/* Tier + Products */}
+      <TierProductFilter
+        selectedProducts={filters.products}
+        selectedTiers={filters.tiers || []}
+        onChangeProducts={(v) => f('products', v)}
+        onChangeTiers={(v) => f('tiers', v)}
       />
 
       {/* Markets */}
