@@ -22,7 +22,7 @@ const formatContact = (contact) => {
     ...contact,
     full_name: fullName || contact.name || 'Unnamed contact',
     company_name: contact.company?.name || contact.company || '',
-    deal_count: Array.isArray(contact.deals) ? contact.deals.length : 0,
+    deal_count: Array.isArray(contact.relationships) ? contact.relationships.length : 0,
     activity_count: Array.isArray(contact.activities) ? contact.activities.length : 0,
     tags,
     last_activity: contact.last_activity || contact.updated_at || contact.created_at || null,
@@ -78,7 +78,7 @@ export function useContacts() {
       const [contactsRes, companiesRes, membersRes] = await Promise.all([
         supabase
           .from('contacts')
-          .select('*, company:companies(id,name), deals(id), activities(id)')
+          .select('*, company:companies(id,name), relationships(id), activities(id)')
           .order('updated_at', { ascending: false }),
         supabase.from('companies').select('id,name').order('name', { ascending: true }),
         supabase.from('profiles').select('id,email').order('email', { ascending: true }),
@@ -211,7 +211,7 @@ export function useContacts() {
       return text;
     };
 
-    const headers = ['Name', 'Company', 'Title', 'Email', 'Phone', 'Tags', 'Last Activity', 'Deals', 'Activities', 'Created By'];
+    const headers = ['Name', 'Company', 'Title', 'Email', 'Phone', 'Tags', 'Last Activity', 'Relationships', 'Activities', 'Created By'];
     const rows = contactsToExport.map((contact) => [
       contact.full_name,
       contact.company_name,
