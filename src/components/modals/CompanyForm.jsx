@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from '../../utils/toast';
 
 const INDUSTRIES = [
   'Energy', 'Finance', 'Technology', 'Government', 'Media',
@@ -38,6 +39,8 @@ export default function CompanyForm({ company, onClose, onSave }) {
         notes: form.notes.trim() || null,
       });
       onClose();
+    } catch (err) {
+      toast.error(err.message || 'Failed to save company');
     } finally {
       setSaving(false);
     }
@@ -78,7 +81,7 @@ export default function CompanyForm({ company, onClose, onSave }) {
 
           <label className="block space-y-1.5 text-sm font-medium text-slate-700">
             Website
-            <input value={form.website} onChange={set('website')} type="url"
+            <input value={form.website} onChange={set('website')} type="text"
               className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
               placeholder="https://example.com" />
           </label>

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTeam } from './useTeam';
+import { useAuth } from './useAuth';
 
 export function useCompanies() {
   const { currentTeam } = useTeam();
+  const { user } = useAuth();
   const teamId = currentTeam?.id || null;
 
   const [companies, setCompanies] = useState([]);
@@ -98,11 +100,16 @@ export function useCompanies() {
   const refresh = useCallback(() => fetchCompanies(), [fetchCompanies]);
 
   const createCompany = useCallback(async (payload) => {
-    const { data, error } = await supabase.from('companies').insert(payload).select().single();
+    const insert = {
+      ...payload,
+      ...(teamId && { team_id: teamId }),
+      ...(user?.id && { created_by: user.id }),
+    };
+    const { data, error } = await supabase.from('companies').insert(insert).select().single();
     if (error) throw error;
     await fetchCompanies();
     return data;
-  }, [fetchCompanies]);
+  }, [fetchCompanies, teamId, user]);
 
   const updateCompany = useCallback(async (id, payload) => {
     const { data, error } = await supabase.from('companies').update(payload).eq('id', id).select().single();
@@ -145,6 +152,8 @@ export function useCompanies() {
         country: row.country || null,
         website: row.website || null,
         notes: row.notes || null,
+        ...(teamId && { team_id: teamId }),
+        ...(user?.id && { created_by: user.id }),
       });
     });
 

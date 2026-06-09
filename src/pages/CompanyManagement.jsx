@@ -25,19 +25,15 @@ export default function CompanyManagement() {
   );
 
   const handleSave = async (payload) => {
-    try {
-      if (editingCompany) {
-        await updateCompany(editingCompany.id, payload);
-        toast.success('Company updated');
-      } else {
-        await createCompany(payload);
-        toast.success('Company created');
-      }
-      setEditingCompany(null);
-      setShowForm(false);
-    } catch (err) {
-      toast.error(err.message || 'Failed to save company');
+    if (editingCompany) {
+      await updateCompany(editingCompany.id, payload);
+      toast.success('Company updated');
+    } else {
+      await createCompany(payload);
+      toast.success('Company created');
     }
+    setEditingCompany(null);
+    setShowForm(false);
   };
 
   const handleDelete = async (company) => {
