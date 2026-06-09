@@ -218,6 +218,9 @@ export function useContacts() {
 
   const importContacts = useCallback(
     async (rows) => {
+      const withValue = (obj) =>
+        Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== '' && v !== undefined));
+
       const payloads = rows.map((row) => {
         const { first_name, last_name } = splitName(row.full_name || row.name || '');
         return {
@@ -226,15 +229,17 @@ export function useContacts() {
           email: row.email || null,
           phone: row.phone || null,
           job_title: row.job_title || null,
-          contact_type: row.contact_type || null,
-          source: row.source || null,
-          priority: row.priority || null,
-          region: row.region || null,
-          next_touch_date: row.next_touch_date || null,
-          stage: row.stage || null,
           tags: row.tags ? row.tags.split(',').map((t) => t.trim()).filter(Boolean) : null,
           team_id: teamId || null,
           created_by: user?.id || null,
+          ...withValue({
+            contact_type: row.contact_type || null,
+            source: row.source || null,
+            priority: row.priority || null,
+            region: row.region || null,
+            next_touch_date: row.next_touch_date || null,
+            stage: row.stage || null,
+          }),
         };
       });
       const { data, error } = await supabase.from('contacts').insert(payloads).select();

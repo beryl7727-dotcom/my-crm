@@ -111,6 +111,9 @@ export default function NewContactModal({ onClose, onCreated }) {
       const [first_name, ...rest] = nameParts;
       const last_name = rest.join(' ');
 
+      const withValue = (obj) =>
+        Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== '' && v !== undefined));
+
       const { data, error } = await supabase
         .from('contacts')
         .insert({
@@ -120,16 +123,18 @@ export default function NewContactModal({ onClose, onCreated }) {
           phone: payload.phone,
           job_title: payload.job_title,
           company_id: companyId || null,
-          contact_type: values.contact_type || null,
-          source: values.source || null,
-          priority: values.priority || null,
-          region: values.region || null,
-          next_touch_date: values.next_touch_date || null,
-          stage: values.stage || null,
           notes: payload.notes,
           tags: payload.tags,
           team_id: currentTeam?.id || null,
           created_by: user?.id || null,
+          ...withValue({
+            contact_type: values.contact_type || null,
+            source: values.source || null,
+            priority: values.priority || null,
+            region: values.region || null,
+            next_touch_date: values.next_touch_date || null,
+            stage: values.stage || null,
+          }),
         })
         .select()
         .single();

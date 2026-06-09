@@ -99,6 +99,11 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
     if (!form.first_name.trim()) { toast.error('First name is required'); return; }
     setSaving(true);
     try {
+      // Only include optional columns when they have a value — prevents 400
+      // errors if the DB migration hasn't been run yet for newer columns.
+      const withValue = (obj) =>
+        Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== '' && v !== undefined));
+
       const payload = {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim() || null,
@@ -109,18 +114,20 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
         country: form.country.trim() || null,
         notes: form.notes.trim() || null,
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
-        contact_type: form.contact_type || null,
-        source: form.source || null,
-        priority: form.priority || null,
-        region: form.region.trim() || null,
-        next_touch_date: form.next_touch_date || null,
-        stage: form.stage || null,
         relationship_score: form.relationship_score || null,
         preferred_communication: form.preferred_communication || null,
         personal_notes: form.personal_notes.trim() || null,
         products_interested: form.products_interested,
         preferred_markets: form.preferred_markets,
         preferred_volume: form.preferred_volume || null,
+        ...withValue({
+          contact_type: form.contact_type || null,
+          source: form.source || null,
+          priority: form.priority || null,
+          region: form.region.trim() || null,
+          next_touch_date: form.next_touch_date || null,
+          stage: form.stage || null,
+        }),
       };
       const { data, error } = await supabase.from('contacts').update(payload).eq('id', contact.id).select().single();
       if (error) throw error;
