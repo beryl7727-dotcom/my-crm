@@ -99,7 +99,7 @@ export default function NewContactModal({ onClose, onCreated }) {
         } else {
           const { data: createdCompany, error: createError } = await supabase
             .from('companies')
-            .insert({ name: companyName })
+            .insert({ name: companyName, team_id: currentTeam?.id || null })
             .select()
             .single();
           if (createError) throw createError;

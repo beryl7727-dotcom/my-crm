@@ -191,7 +191,7 @@ export function useContacts() {
           if (existing?.id) {
             companyId = existing.id;
           } else {
-            const { data: created } = await supabase.from('companies').insert({ name: cv }).select().single();
+            const { data: created } = await supabase.from('companies').insert({ name: cv, team_id: teamId }).select().single();
             companyId = created?.id;
           }
         }

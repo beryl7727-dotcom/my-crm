@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTeam } from './useTeam';
+import { useAuth } from './useAuth';
 
 export function useCompanies() {
   const { currentTeam } = useTeam();
+  const { user } = useAuth();
   const teamId = currentTeam?.id || null;
 
   const [companies, setCompanies] = useState([]);
@@ -98,21 +100,23 @@ export function useCompanies() {
   const refresh = useCallback(() => fetchCompanies(), [fetchCompanies]);
 
   const createCompany = useCallback(async (payload) => {
-    // Only send fields that have a value — prevents 400 if optional columns
-    // don't exist yet (run phase8_companies_fields.sql to add them).
     const withValue = (obj) =>
       Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== '' && v !== undefined));
-    const insert = { name: payload.name, ...withValue({
-      industry: payload.industry,
-      country: payload.country,
-      website: payload.website,
-      notes: payload.notes,
-    }) };
+    const insert = {
+      name: payload.name,
+      team_id: teamId,
+      ...withValue({
+        industry: payload.industry,
+        country: payload.country,
+        website: payload.website,
+        notes: payload.notes,
+      }),
+    };
     const { data, error } = await supabase.from('companies').insert(insert).select().single();
     if (error) throw error;
     await fetchCompanies();
     return data;
-  }, [fetchCompanies]);
+  }, [fetchCompanies, teamId]);
 
   const updateCompany = useCallback(async (id, payload) => {
     const { data, error } = await supabase.from('companies').update(payload).eq('id', id).select().single();
@@ -151,12 +155,16 @@ export function useCompanies() {
       existingNames.add(name.toLowerCase()); // prevent duplicates within the CSV itself
       const withValue = (obj) =>
         Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== '' && v !== undefined));
-      toInsert.push({ name, ...withValue({
-        industry: row.industry || null,
-        country: row.country || null,
-        website: row.website || null,
-        notes: row.notes || null,
-      }) });
+      toInsert.push({
+        name,
+        team_id: teamId,
+        ...withValue({
+          industry: row.industry || null,
+          country: row.country || null,
+          website: row.website || null,
+          notes: row.notes || null,
+        }),
+      });
     });
 
     if (toInsert.length > 0) {
@@ -166,7 +174,7 @@ export function useCompanies() {
 
     await fetchCompanies();
     return { imported: toInsert.length, skipped };
-  }, [fetchCompanies]);
+  }, [fetchCompanies, teamId]);
 
   return {
     companies,
