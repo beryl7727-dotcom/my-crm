@@ -226,6 +226,8 @@ export function useContacts() {
           email: row.email || null,
           phone: row.phone || null,
           job_title: row.job_title || null,
+          contact_type: row.contact_type || null,
+          source: row.source || null,
           tags: row.tags ? row.tags.split(',').map((t) => t.trim()).filter(Boolean) : null,
           team_id: teamId || null,
           created_by: user?.id || null,

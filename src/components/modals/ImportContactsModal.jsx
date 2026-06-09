@@ -24,6 +24,11 @@ const COLUMN_MAP = {
   tags: 'tags',
   labels: 'tags',
   categories: 'tags',
+  'contact type': 'contact_type',
+  'contact_type': 'contact_type',
+  type: 'contact_type',
+  source: 'source',
+  'lead source': 'source',
 };
 
 function parseCSV(text) {
@@ -77,8 +82,14 @@ const FIELD_OPTIONS = [
   { value: 'phone', label: 'Phone' },
   { value: 'company_name', label: 'Company' },
   { value: 'job_title', label: 'Job Title' },
+  { value: 'contact_type', label: 'Contact Type' },
+  { value: 'source', label: 'Source' },
   { value: 'tags', label: 'Tags' },
 ];
+
+// Valid enum values accepted by the database
+export const CONTACT_TYPE_VALUES = ['Trader','Corporate Buyer','Registry','Government','Media','Project Developer','Exchange'];
+export const SOURCE_VALUES = ['LinkedIn','Referral','Conference / Event','Cold Outreach','Existing Client','Partner / Broker','Website','Other'];
 
 export default function ImportContactsModal({ onClose, onImport }) {
   const fileRef = useRef(null);
@@ -173,7 +184,7 @@ export default function ImportContactsModal({ onClose, onImport }) {
             <p className="text-lg font-semibold text-slate-700">Drop a CSV file here</p>
             <p className="mt-1 text-sm text-slate-500">or click to browse</p>
             <p className="mt-3 text-xs text-slate-400">
-              Columns detected automatically: Name, Email, Phone, Company, Title, Tags
+              Columns detected automatically: Name, Email, Phone, Company, Title, Contact Type, Source, Tags
             </p>
             <input
               ref={fileRef}
@@ -191,6 +202,10 @@ export default function ImportContactsModal({ onClose, onImport }) {
             <p className="text-sm text-slate-600">
               {rows.length} rows found. Map each CSV column to a contact field.
             </p>
+            <div className="rounded-2xl bg-slate-50 border border-slate-200 px-4 py-3 text-xs text-slate-500 space-y-1">
+              <p><span className="font-semibold text-slate-700">Contact Type values:</span> {CONTACT_TYPE_VALUES.join(' · ')}</p>
+              <p><span className="font-semibold text-slate-700">Source values:</span> {SOURCE_VALUES.join(' · ')}</p>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {headers.map((header, idx) => (
                 <div key={idx} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
