@@ -101,7 +101,7 @@ const FIELD_OPTIONS = [
 
 // Valid enum values accepted by the database
 export const CONTACT_TYPE_VALUES = ['Trader','Corporate Buyer','Registry','Government','Media','Project Developer','Exchange'];
-export const SOURCE_VALUES = ['LinkedIn','Referral','Conference / Event','Cold Outreach','Existing Client','Partner / Broker','Website','Other'];
+export const SOURCE_VALUES = ['RECS2025','LinkedIn','Referral','Conference / Event','Cold Outreach','Existing Client','Partner / Broker','Website','Other'];
 
 export default function ImportContactsModal({ onClose, onImport }) {
   const fileRef = useRef(null);

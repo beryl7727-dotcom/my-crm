@@ -6,7 +6,7 @@ import { useTeam } from '../../hooks/useTeam';
 import { useAuth } from '../../hooks/useAuth';
 import { CONTACT_TYPES } from '../../utils/relationshipStages';
 
-const SOURCE_OPTIONS = ['LinkedIn','Referral','Conference / Event','Cold Outreach','Existing Client','Partner / Broker','Website','Other'];
+const SOURCE_OPTIONS = ['RECS2025','LinkedIn','Referral','Conference / Event','Cold Outreach','Existing Client','Partner / Broker','Website','Other'];
 
 export default function NewContactModal({ onClose, onCreated }) {
   const { currentTeam } = useTeam();

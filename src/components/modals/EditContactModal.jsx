@@ -235,7 +235,7 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
                     <select value={form.source} onChange={set('source')}
                       className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none">
                       <option value="">Unknown</option>
-                      {['LinkedIn','Referral','Conference / Event','Cold Outreach','Existing Client','Partner / Broker','Website','Other'].map((s) => (
+                      {['RECS2025','LinkedIn','Referral','Conference / Event','Cold Outreach','Existing Client','Partner / Broker','Website','Other'].map((s) => (
                         <option key={s} value={s}>{s}</option>
                       ))}
                     </select>
