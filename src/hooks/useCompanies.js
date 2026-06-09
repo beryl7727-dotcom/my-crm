@@ -98,7 +98,17 @@ export function useCompanies() {
   const refresh = useCallback(() => fetchCompanies(), [fetchCompanies]);
 
   const createCompany = useCallback(async (payload) => {
-    const { data, error } = await supabase.from('companies').insert(payload).select().single();
+    // Only send fields that have a value — prevents 400 if optional columns
+    // don't exist yet (run phase8_companies_fields.sql to add them).
+    const withValue = (obj) =>
+      Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== '' && v !== undefined));
+    const insert = { name: payload.name, ...withValue({
+      industry: payload.industry,
+      country: payload.country,
+      website: payload.website,
+      notes: payload.notes,
+    }) };
+    const { data, error } = await supabase.from('companies').insert(insert).select().single();
     if (error) throw error;
     await fetchCompanies();
     return data;
@@ -139,13 +149,14 @@ export function useCompanies() {
         return;
       }
       existingNames.add(name.toLowerCase()); // prevent duplicates within the CSV itself
-      toInsert.push({
-        name,
+      const withValue = (obj) =>
+        Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== '' && v !== undefined));
+      toInsert.push({ name, ...withValue({
         industry: row.industry || null,
         country: row.country || null,
         website: row.website || null,
         notes: row.notes || null,
-      });
+      }) });
     });
 
     if (toInsert.length > 0) {
