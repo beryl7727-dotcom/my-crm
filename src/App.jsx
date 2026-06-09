@@ -18,6 +18,7 @@ import CalendarPage from './pages/CalendarPage';
 import MessagingHub from './pages/MessagingHub';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import CompanyManagement from './pages/CompanyManagement';
 
 function App() {
   return (
@@ -84,6 +85,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Reports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/companies"
+              element={
+                <ProtectedRoute>
+                  <CompanyManagement />
                 </ProtectedRoute>
               }
             />

@@ -6,6 +6,7 @@ import { useTeam } from '../hooks/useTeam';
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/contacts', label: 'Contacts' },
+  { to: '/companies', label: 'Companies' },
   { to: '/calendar', label: 'Calendar' },
   { to: '/messaging', label: 'Messaging Hub' },
   { to: '/reports', label: 'Reports' },
