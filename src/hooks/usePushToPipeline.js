@@ -15,8 +15,9 @@ export function usePushToPipeline() {
       setFlag(contact.id, true);
       try {
         // Create a relationship at the first stage for this contact
+        const contactName = contact.full_name || [contact.first_name, contact.last_name].filter(Boolean).join(' ') || 'Unnamed';
         const { error: relErr } = await supabase.from('relationships').insert({
-          name: contact.full_name || [contact.first_name, contact.last_name].filter(Boolean).join(' ') || 'Unnamed',
+          title: contactName,
           primary_contact_id: contact.id,
           company_id: contact.company_id || null,
           stage: 'relationship',
