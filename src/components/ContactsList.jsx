@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../utils/toast';
 import ContactAvatar from './ContactAvatar';
 import ContactTypeIcon from './ContactTypeIcon';
 import RelationshipScoreStar from './RelationshipScoreStar';
 import PipelineCheckbox from './PipelineCheckbox';
+import { usePushToPipeline } from '../hooks/usePushToPipeline';
 
 const STAGE_STYLES = {
   relationship: 'bg-blue-100 text-blue-700',
@@ -80,6 +82,35 @@ export default function ContactsList({
   const navigate = useNavigate();
   const selectedSet = useMemo(() => new Set(selectedIds || []), [selectedIds]);
   const [hoveredId, setHoveredId] = useState(null);
+  const { pushToPipeline, markDoNotContact, clearDoNotContact, processing } = usePushToPipeline();
+
+  const handlePush = async (contact) => {
+    try {
+      await pushToPipeline(contact, onUpdateContact);
+      toast.success(`${contact.full_name} pushed to pipeline`);
+    } catch (err) {
+      toast.error(err.message || 'Failed to push to pipeline');
+    }
+  };
+
+  const handleDnc = async (contactId) => {
+    const contact = contacts.find((c) => c.id === contactId);
+    try {
+      await markDoNotContact(contactId, onUpdateContact);
+      toast.error(`${contact?.full_name || 'Contact'} marked as Do Not Contact`);
+    } catch (err) {
+      toast.error(err.message || 'Failed to update contact');
+    }
+  };
+
+  const handleClearDnc = async (contactId) => {
+    try {
+      await clearDoNotContact(contactId, onUpdateContact);
+      toast.success('Do Not Contact removed');
+    } catch (err) {
+      toast.error(err.message || 'Failed to update contact');
+    }
+  };
 
   const handleSort = (col) => {
     if (onSort) onSort(col, sortBy === col && sortOrder === 'asc' ? 'desc' : 'asc');
@@ -187,7 +218,13 @@ export default function ContactsList({
                 </td>
 
                 <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                  <PipelineCheckbox contact={contact} onUpdate={onUpdateContact} />
+                  <PipelineCheckbox
+                    contact={contact}
+                    busy={!!processing[contact.id]}
+                    onPush={handlePush}
+                    onDnc={handleDnc}
+                    onClearDnc={handleClearDnc}
+                  />
                 </td>
 
                 <td className="px-4 py-3">
