@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import ContactHeader from '../components/ContactHeader';
 import NewDealModal from '../components/modals/NewDealModal';
 import EditDealModal from '../components/modals/EditDealModal';
+import EditContactModal from '../components/modals/EditContactModal';
 import LogActivityModal from '../components/modals/LogActivityModal';
 import DealsList from '../components/DealsList';
 import ActivityTimeline from '../components/ActivityTimeline';
@@ -20,6 +21,7 @@ export default function ContactDetail() {
   const [activeTab, setActiveTab] = useState('relationships');
   const [showNewDeal, setShowNewDeal] = useState(false);
   const [showLogActivity, setShowLogActivity] = useState(false);
+  const [showEditContact, setShowEditContact] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState(null);
   const [activityFilter, setActivityFilter] = useState('all');
   const [notesEditing, setNotesEditing] = useState(false);
@@ -92,9 +94,7 @@ export default function ContactDetail() {
     refresh();
   };
 
-  const handleEdit = () => {
-    console.log('Edit contact', contactId);
-  };
+  const handleEdit = () => setShowEditContact(true);
 
   const handleArchive = () => {
     console.log('Archive contact', contactId);
@@ -295,6 +295,13 @@ export default function ContactDetail() {
       )}
       {selectedDeal && (
         <EditDealModal deal={selectedDeal} onClose={() => setSelectedDeal(null)} onUpdated={handleDealUpdated} />
+      )}
+      {showEditContact && contact && (
+        <EditContactModal
+          contact={contact}
+          onClose={() => setShowEditContact(false)}
+          onSaved={() => { setShowEditContact(false); refresh(); }}
+        />
       )}
     </div>
   );
