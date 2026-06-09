@@ -243,6 +243,8 @@ export default function useReports(teamId) {
     selectedMember,
     setSelectedMemberId,
     contactTrends,
+    deals,
+    contacts: normalizedContacts,
     exportPipelineCsv,
     exportContactsCsv,
   };

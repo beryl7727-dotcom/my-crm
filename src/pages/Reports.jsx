@@ -4,6 +4,7 @@ import useReports from '../hooks/useReports';
 import PipelineHealth from '../components/PipelineHealth';
 import TeamLeaderboard from '../components/TeamLeaderboard';
 import ContactTrends from '../components/ContactTrends';
+import TierReports from '../components/TierReports';
 import { toast } from '../utils/toast';
 
 const downloadCsv = (filename, csvContent) => {
@@ -33,6 +34,8 @@ export default function Reports() {
     selectedMember,
     setSelectedMemberId,
     contactTrends,
+    deals,
+    contacts,
     exportPipelineCsv,
     exportContactsCsv,
   } = useReports(teamId);
@@ -103,6 +106,8 @@ export default function Reports() {
       />
 
       <ContactTrends trends={contactTrends} />
+
+      <TierReports deals={deals || []} contacts={contacts || []} />
 
       <section className="space-y-4">
         <h2 className="text-xl font-semibold text-slate-900">Export</h2>

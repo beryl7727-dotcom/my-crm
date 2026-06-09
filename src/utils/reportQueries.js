@@ -4,7 +4,7 @@ export async function fetchTeamDeals(teamId) {
   const { data, error } = await supabase
     .from('relationships')
     .select(
-      'id, title, value, stage, probability, created_by, created_at, updated_at, contact:contacts(first_name,last_name), company:companies(name)'
+      'id, title, value, stage, probability, created_by, created_at, updated_at, details, contact:contacts(first_name,last_name), company:companies(name)'
     )
     .eq('team_id', teamId);
   if (error) throw error;
@@ -24,7 +24,9 @@ export async function fetchTeamMembers(teamId) {
 export async function fetchContactsForReports() {
   const { data, error } = await supabase
     .from('contacts')
-    .select('id, first_name, last_name, email, created_at, company:companies(name), activities(id)')
+    .select(
+      'id, first_name, last_name, email, created_at, focus_tier, interest_products_tier_1, interest_products_tier_2, interest_products_tier_3, company:companies(name), activities(id)'
+    )
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data || [];

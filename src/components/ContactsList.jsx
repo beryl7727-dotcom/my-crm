@@ -7,6 +7,7 @@ import RelationshipScoreStar from './RelationshipScoreStar';
 import PipelineCheckbox from './PipelineCheckbox';
 import { usePushToPipeline } from '../hooks/usePushToPipeline';
 import NewDealModal from './modals/NewDealModal';
+import { TIER_PRODUCTS, TIER_COLORS } from '../constants/products';
 
 const STAGE_STYLES = {
   relationship: 'bg-blue-100 text-blue-700',
@@ -142,6 +143,8 @@ export default function ContactsList({
             <th className="px-4 py-3 text-left">Email / Phone</th>
             <SortHeader label="Last Contact" col="last_activity" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
             <th className="px-4 py-3 text-left">Relationships</th>
+            <th className="px-4 py-3 text-left" title="Focus tier — 1️⃣ Revenue Now · 2️⃣ Strategic · 3️⃣ Corporate">Focus</th>
+            <th className="px-4 py-3 text-left">Products</th>
             <th className="px-4 py-3 text-left" title="Check to push to pipeline; uncheck to mark Do Not Contact">Pipeline</th>
             <th className="px-4 py-3 text-left">Status</th>
             <th className="px-4 py-3 text-left">Actions</th>
@@ -224,6 +227,46 @@ export default function ContactsList({
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STAGE_STYLES[contact.primary_stage] || ''}`}>
                         {STAGE_LABELS[contact.primary_stage]}
                       </span>
+                    )}
+                  </div>
+                </td>
+
+                {/* Focus Tier */}
+                <td className="px-4 py-3">
+                  {contact.focus_tier ? (() => {
+                    const meta = TIER_PRODUCTS[contact.focus_tier];
+                    return meta ? (
+                      <span
+                        className="rounded-full px-2 py-0.5 text-xs font-semibold"
+                        style={{ backgroundColor: `${TIER_COLORS[contact.focus_tier]}18`, color: TIER_COLORS[contact.focus_tier] }}
+                        title={`${meta.emoji} ${meta.title} — ${meta.focus}`}
+                      >
+                        {meta.emoji} {contact.focus_tier}
+                      </span>
+                    ) : null;
+                  })() : <span className="text-slate-300">—</span>}
+                </td>
+
+                {/* Products by tier */}
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3].map((n) => {
+                      const arr = contact[`interest_products_tier_${n}`] || [];
+                      if (arr.length === 0) return null;
+                      const meta = TIER_PRODUCTS[n];
+                      return (
+                        <span
+                          key={n}
+                          className="rounded-full px-1.5 py-0.5 text-xs font-semibold"
+                          style={{ backgroundColor: `${TIER_COLORS[n]}18`, color: TIER_COLORS[n] }}
+                          title={arr.join(', ')}
+                        >
+                          {meta.emoji}{arr.length}
+                        </span>
+                      );
+                    })}
+                    {[1,2,3].every(n => !(contact[`interest_products_tier_${n}`]||[]).length) && (
+                      <span className="text-slate-300">—</span>
                     )}
                   </div>
                 </td>

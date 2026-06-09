@@ -7,6 +7,7 @@ import { useStructuringDeals } from '../hooks/useStructuringDeals';
 import { usePriorityCompanies } from '../hooks/usePriorityCompanies';
 import { useExecutedThisMonth } from '../hooks/useExecutedThisMonth';
 import StatCard from '../components/StatCard';
+import TierDistributionCard from '../components/TierDistributionCard';
 import KanbanBoard from '../components/KanbanBoard';
 import PriorityCompanies from '../components/PriorityCompanies';
 import FollowUpsList from '../components/FollowUpsList';
@@ -76,6 +77,7 @@ export default function Dashboard() {
             subtitle={`${executedCount} ${executedCount === 1 ? 'relationship' : 'relationships'} executed`}
             color="green"
           />
+          <TierDistributionCard />
         </div>
 
         {/* Row 2 — Priority companies */}
