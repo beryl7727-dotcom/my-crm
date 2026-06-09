@@ -6,6 +6,7 @@ import ContactTypeIcon from './ContactTypeIcon';
 import RelationshipScoreStar from './RelationshipScoreStar';
 import PipelineCheckbox from './PipelineCheckbox';
 import { usePushToPipeline } from '../hooks/usePushToPipeline';
+import NewDealModal from './modals/NewDealModal';
 
 const STAGE_STYLES = {
   relationship: 'bg-blue-100 text-blue-700',
@@ -82,14 +83,24 @@ export default function ContactsList({
   const navigate = useNavigate();
   const selectedSet = useMemo(() => new Set(selectedIds || []), [selectedIds]);
   const [hoveredId, setHoveredId] = useState(null);
-  const { pushToPipeline, markDoNotContact, clearDoNotContact, processing } = usePushToPipeline();
+  const [pipelineContact, setPipelineContact] = useState(null);
+  const { markDoNotContact, clearDoNotContact, processing } = usePushToPipeline();
 
-  const handlePush = async (contact) => {
+  // Open the relationship form pre-filled with this contact
+  const handlePush = (contact) => {
+    setPipelineContact(contact);
+  };
+
+  // Called after NewDealModal successfully saves the relationship
+  const handlePipelineCreated = async () => {
+    if (!pipelineContact) return;
     try {
-      await pushToPipeline(contact, onUpdateContact);
-      toast.success(`${contact.full_name} pushed to pipeline`);
+      await onUpdateContact(pipelineContact.id, { ready_for_pipeline: true, do_not_contact: false });
+      toast.success(`${pipelineContact.full_name} pushed to pipeline`);
     } catch (err) {
-      toast.error(err.message || 'Failed to push to pipeline');
+      toast.error(err.message || 'Failed to update contact');
+    } finally {
+      setPipelineContact(null);
     }
   };
 
@@ -273,6 +284,14 @@ export default function ContactsList({
           })}
         </tbody>
       </table>
+
+      {pipelineContact && (
+        <NewDealModal
+          initialContact={pipelineContact}
+          onClose={() => setPipelineContact(null)}
+          onCreated={handlePipelineCreated}
+        />
+      )}
     </div>
   );
 }
