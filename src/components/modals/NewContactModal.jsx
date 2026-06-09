@@ -232,7 +232,7 @@ export default function NewContactModal({ onClose, onCreated }) {
                 className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
               >
                 <option value="">No priority</option>
-                {['High','Medium','Low'].map((p) => <option key={p} value={p}>{p}</option>)}
+                {['A+','A','B','C'].map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
             </label>
             <label className="space-y-2 text-sm font-medium text-slate-700">
@@ -242,7 +242,7 @@ export default function NewContactModal({ onClose, onCreated }) {
                 className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
               >
                 <option value="">No stage</option>
-                {['Lead','Prospect','Qualified','Active','Dormant'].map((s) => <option key={s} value={s}>{s}</option>)}
+                {['Relationship','Discovery','Structuring','Execution','Refresh'].map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </label>
             <label className="space-y-2 text-sm font-medium text-slate-700">

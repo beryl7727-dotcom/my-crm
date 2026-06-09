@@ -245,7 +245,7 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
                     <select value={form.priority} onChange={set('priority')}
                       className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none">
                       <option value="">No priority</option>
-                      {['High','Medium','Low'].map((p) => <option key={p} value={p}>{p}</option>)}
+                      {['A+','A','B','C'].map((p) => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </label>
                   <label className="space-y-1.5 text-sm font-medium text-slate-700">
@@ -253,7 +253,7 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
                     <select value={form.stage} onChange={set('stage')}
                       className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none">
                       <option value="">No stage</option>
-                      {['Lead','Prospect','Qualified','Active','Dormant'].map((s) => <option key={s} value={s}>{s}</option>)}
+                      {['Relationship','Discovery','Structuring','Execution','Refresh'].map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </label>
                   <label className="space-y-1.5 text-sm font-medium text-slate-700">
