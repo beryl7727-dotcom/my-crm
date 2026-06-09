@@ -47,6 +47,10 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
     notes: '', tags: '',
     contact_type: '',
     source: '',
+    priority: '',
+    region: '',
+    next_touch_date: '',
+    stage: '',
     relationship_score: 0,
     preferred_communication: '',
     personal_notes: '',
@@ -69,6 +73,10 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
         tags: Array.isArray(contact.tags) ? contact.tags.join(', ') : contact.tags || '',
         contact_type: contact.contact_type || '',
         source: contact.source || '',
+        priority: contact.priority || '',
+        region: contact.region || '',
+        next_touch_date: contact.next_touch_date ? contact.next_touch_date.slice(0, 10) : '',
+        stage: contact.stage || '',
         relationship_score: contact.relationship_score || 0,
         preferred_communication: contact.preferred_communication || '',
         personal_notes: contact.personal_notes || '',
@@ -103,6 +111,10 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
         contact_type: form.contact_type || null,
         source: form.source || null,
+        priority: form.priority || null,
+        region: form.region.trim() || null,
+        next_touch_date: form.next_touch_date || null,
+        stage: form.stage || null,
         relationship_score: form.relationship_score || null,
         preferred_communication: form.preferred_communication || null,
         personal_notes: form.personal_notes.trim() || null,
@@ -221,6 +233,33 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
                       ))}
                     </select>
                   </label>
+                  <label className="space-y-1.5 text-sm font-medium text-slate-700">
+                    Priority
+                    <select value={form.priority} onChange={set('priority')}
+                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none">
+                      <option value="">No priority</option>
+                      {['High','Medium','Low'].map((p) => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </label>
+                  <label className="space-y-1.5 text-sm font-medium text-slate-700">
+                    Stage
+                    <select value={form.stage} onChange={set('stage')}
+                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none">
+                      <option value="">No stage</option>
+                      {['Lead','Prospect','Qualified','Active','Dormant'].map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </label>
+                  <label className="space-y-1.5 text-sm font-medium text-slate-700">
+                    Region
+                    <input value={form.region} onChange={set('region')}
+                      className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
+                      placeholder="e.g. APAC, EMEA, Americas" />
+                  </label>
+                  <label className="space-y-1.5 text-sm font-medium text-slate-700">
+                    Next touch date
+                    <input value={form.next_touch_date} onChange={set('next_touch_date')} type="date"
+                      className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none" />
+                  </label>
                   <label className="space-y-1.5 text-sm font-medium text-slate-700 md:col-span-2">
                     Company
                     <select value={form.company_id} onChange={set('company_id')}
@@ -235,15 +274,6 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
 
             {activeTab === 'profile' && (
               <div className="space-y-5">
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
-                  Contact type
-                  <select value={form.contact_type} onChange={set('contact_type')}
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none">
-                    <option value="">No type</option>
-                    {CONTACT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                </label>
-
                 <div className="space-y-1.5">
                   <p className="text-sm font-medium text-slate-700">Relationship score</p>
                   <RelationshipScoreStar

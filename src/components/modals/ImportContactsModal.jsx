@@ -29,6 +29,14 @@ const COLUMN_MAP = {
   type: 'contact_type',
   source: 'source',
   'lead source': 'source',
+  priority: 'priority',
+  region: 'region',
+  territory: 'region',
+  'next touch': 'next_touch_date',
+  'next touch date': 'next_touch_date',
+  'next_touch_date': 'next_touch_date',
+  stage: 'stage',
+  'contact stage': 'stage',
 };
 
 function parseCSV(text) {
@@ -84,6 +92,10 @@ const FIELD_OPTIONS = [
   { value: 'job_title', label: 'Job Title' },
   { value: 'contact_type', label: 'Contact Type' },
   { value: 'source', label: 'Source' },
+  { value: 'priority', label: 'Priority' },
+  { value: 'stage', label: 'Stage' },
+  { value: 'region', label: 'Region' },
+  { value: 'next_touch_date', label: 'Next Touch Date' },
   { value: 'tags', label: 'Tags' },
 ];
 

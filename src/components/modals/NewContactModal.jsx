@@ -28,6 +28,10 @@ export default function NewContactModal({ onClose, onCreated }) {
       job_title: '',
       contact_type: '',
       source: '',
+      priority: '',
+      region: '',
+      next_touch_date: '',
+      stage: '',
       notes: '',
       tags: '',
     },
@@ -118,6 +122,10 @@ export default function NewContactModal({ onClose, onCreated }) {
           company_id: companyId || null,
           contact_type: values.contact_type || null,
           source: values.source || null,
+          priority: values.priority || null,
+          region: values.region || null,
+          next_touch_date: values.next_touch_date || null,
+          stage: values.stage || null,
           notes: payload.notes,
           tags: payload.tags,
           team_id: currentTeam?.id || null,
@@ -208,6 +216,45 @@ export default function NewContactModal({ onClose, onCreated }) {
                 <option value="">Unknown</option>
                 {SOURCE_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
+            </label>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-2 text-sm font-medium text-slate-700">
+              Priority
+              <select
+                {...register('priority')}
+                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
+              >
+                <option value="">No priority</option>
+                {['High','Medium','Low'].map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm font-medium text-slate-700">
+              Stage
+              <select
+                {...register('stage')}
+                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
+              >
+                <option value="">No stage</option>
+                {['Lead','Prospect','Qualified','Active','Dormant'].map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm font-medium text-slate-700">
+              Region
+              <input
+                {...register('region')}
+                className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
+                placeholder="e.g. APAC, EMEA, Americas"
+              />
+            </label>
+            <label className="space-y-2 text-sm font-medium text-slate-700">
+              Next touch date
+              <input
+                {...register('next_touch_date')}
+                type="date"
+                className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
+              />
             </label>
           </div>
 
