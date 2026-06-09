@@ -117,6 +117,46 @@ export function useCompanies() {
     setCompanies((cur) => cur.filter((c) => c.id !== id));
   }, []);
 
+  const importCompanies = useCallback(async (rows) => {
+    // Fetch existing company names to detect duplicates
+    const { data: existing, error: existErr } = await supabase
+      .from('companies')
+      .select('name');
+    if (existErr) throw existErr;
+
+    const existingNames = new Set(
+      (existing || []).map((c) => c.name.toLowerCase().trim())
+    );
+
+    const toInsert = [];
+    let skipped = 0;
+
+    rows.forEach((row) => {
+      const name = (row.name || '').trim();
+      if (!name) return;
+      if (existingNames.has(name.toLowerCase())) {
+        skipped++;
+        return;
+      }
+      existingNames.add(name.toLowerCase()); // prevent duplicates within the CSV itself
+      toInsert.push({
+        name,
+        industry: row.industry || null,
+        country: row.country || null,
+        website: row.website || null,
+        notes: row.notes || null,
+      });
+    });
+
+    if (toInsert.length > 0) {
+      const { error: insertErr } = await supabase.from('companies').insert(toInsert);
+      if (insertErr) throw insertErr;
+    }
+
+    await fetchCompanies();
+    return { imported: toInsert.length, skipped };
+  }, [fetchCompanies]);
+
   return {
     companies,
     loading,
@@ -125,5 +165,6 @@ export function useCompanies() {
     createCompany,
     updateCompany,
     deleteCompany,
+    importCompanies,
   };
 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCompanies } from '../hooks/useCompanies';
 import CompanyForm from '../components/modals/CompanyForm';
+import ImportCompaniesModal from '../components/modals/ImportCompaniesModal';
 import { toast } from '../utils/toast';
 
 const fmt = (d) =>
@@ -12,10 +13,11 @@ const fmtCurrency = (v) =>
 
 export default function CompanyManagement() {
   const navigate = useNavigate();
-  const { companies, loading, error, createCompany, updateCompany, deleteCompany, refresh } = useCompanies();
+  const { companies, loading, error, createCompany, updateCompany, deleteCompany, importCompanies, refresh } = useCompanies();
 
   const [showForm, setShowForm] = useState(false);
   const [editingCompany, setEditingCompany] = useState(null);
+  const [showImport, setShowImport] = useState(false);
   const [search, setSearch] = useState('');
 
   const filtered = companies.filter(
@@ -73,12 +75,20 @@ export default function CompanyManagement() {
           <h1 className="text-3xl font-semibold text-slate-900">Companies</h1>
           <p className="mt-1 text-sm text-slate-500">{companies.length} companies</p>
         </div>
-        <button
-          onClick={() => { setEditingCompany(null); setShowForm(true); }}
-          className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-        >
-          + New Company
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowImport(true)}
+            className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Import CSV
+          </button>
+          <button
+            onClick={() => { setEditingCompany(null); setShowForm(true); }}
+            className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            + New Company
+          </button>
+        </div>
       </div>
 
       {/* Search */}
@@ -184,6 +194,13 @@ export default function CompanyManagement() {
           company={editingCompany}
           onClose={() => { setShowForm(false); setEditingCompany(null); }}
           onSave={handleSave}
+        />
+      )}
+
+      {showImport && (
+        <ImportCompaniesModal
+          onClose={() => setShowImport(false)}
+          onImport={importCompanies}
         />
       )}
     </div>
