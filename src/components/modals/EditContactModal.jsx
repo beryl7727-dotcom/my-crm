@@ -113,6 +113,15 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
       const withValue = (obj) =>
         Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== '' && v !== undefined));
 
+      // Only send tier columns if the DB already has them (phase9 migration guard)
+      const hasTierColumns = contact.interest_products_tier_1 !== undefined;
+
+      const allTierProducts = [
+        ...form.interest_products_tier_1,
+        ...form.interest_products_tier_2,
+        ...form.interest_products_tier_3,
+      ];
+
       const payload = {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim() || null,
@@ -126,18 +135,15 @@ export default function EditContactModal({ contact, onClose, onSaved }) {
         relationship_score: form.relationship_score || null,
         preferred_communication: form.preferred_communication || null,
         personal_notes: form.personal_notes.trim() || null,
-        interest_products_tier_1: form.interest_products_tier_1,
-        interest_products_tier_2: form.interest_products_tier_2,
-        interest_products_tier_3: form.interest_products_tier_3,
-        focus_tier: form.focus_tier ? Number(form.focus_tier) : null,
-        // Flatten all tier selections into legacy field for backward compat
-        products_interested: [
-          ...form.interest_products_tier_1,
-          ...form.interest_products_tier_2,
-          ...form.interest_products_tier_3,
-        ],
         preferred_markets: form.preferred_markets,
         preferred_volume: form.preferred_volume || null,
+        ...(hasTierColumns ? {
+          interest_products_tier_1: form.interest_products_tier_1,
+          interest_products_tier_2: form.interest_products_tier_2,
+          interest_products_tier_3: form.interest_products_tier_3,
+          focus_tier: form.focus_tier ? Number(form.focus_tier) : null,
+          products_interested: allTierProducts,
+        } : {}),
         ...withValue({
           contact_type: form.contact_type || null,
           source: form.source || null,
