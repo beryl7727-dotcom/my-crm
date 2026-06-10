@@ -4,6 +4,7 @@ import { useTeamSettings } from '../hooks/useTeamSettings';
 import TeamInfo from '../components/TeamInfo';
 import InviteForm from '../components/InviteForm';
 import MembersList from '../components/MembersList';
+import ManageDoNotContactReasons from '../components/ManageDoNotContactReasons';
 
 const DEFAULT_PREFERENCES = {
   darkMode: false,
@@ -108,6 +109,8 @@ export default function Settings() {
       <InviteForm team={team} onRegenerate={regenerateInviteCode} isAdmin={isAdmin} mutating={mutating} />
 
       <MembersList members={members} currentUserId={currentUserId} isAdmin={isAdmin} onRemove={removeMember} mutating={mutating} />
+
+      <ManageDoNotContactReasons />
 
       <section className="space-y-4">
         <h2 className="text-xl font-semibold text-slate-900">Preferences</h2>

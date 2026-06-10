@@ -8,6 +8,7 @@ export const CONTACT_TYPE_META = {
   Media: { icon: '📰', colors: { dot: 'bg-rose-500', bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' } },
   'Project Developer': { icon: '🌱', colors: { dot: 'bg-lime-500', bg: 'bg-lime-50', text: 'text-lime-700', border: 'border-lime-200' } },
   Exchange: { icon: '📊', colors: { dot: 'bg-amber-500', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' } },
+  Originator: { icon: '⚡', colors: { dot: 'bg-yellow-500', bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' } },
 };
 
 export const RELATIONSHIP_SCORE_MEANINGS = {

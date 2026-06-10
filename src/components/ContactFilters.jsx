@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { CONTACT_TYPE_META } from '../utils/relationshipProfile';
 import { TIER_PRODUCTS } from '../constants/products';
-
-const CONTACT_TYPES = ['Trader', 'Corporate Buyer', 'Registry', 'Government', 'Media', 'Project Developer', 'Exchange'];
+import { CONTACT_TYPES } from '../constants/contactTypes';
 
 const MARKETS = [
   { value: 'apac', label: 'APAC' },
@@ -176,6 +175,12 @@ const TierProductFilter = ({ selectedProducts, selectedTiers, onChangeProducts, 
   );
 };
 
+const DNC_OPTIONS = [
+  { value: 'all', label: 'All' },
+  { value: 'contact', label: 'Contact' },
+  { value: 'dnc', label: 'Do Not Contact' },
+];
+
 export default function ContactFilters({
   filters,
   setFilters,
@@ -184,6 +189,7 @@ export default function ContactFilters({
   tags = [],
   activeFilterCount = 0,
   onReset,
+  dncReasons = [],
 }) {
   const f = (field, value) => setFilters((cur) => ({ ...cur, [field]: value }));
 
@@ -221,6 +227,56 @@ export default function ContactFilters({
         selected={filters.markets}
         onChange={(v) => f('markets', v)}
       />
+
+      {/* Contact Status (DNC) */}
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Contact Status</p>
+        <div className="flex gap-2">
+          {DNC_OPTIONS.map(({ value, label }) => {
+            const active = (filters.dncStatus || 'all') === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => f('dncStatus', value)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  active
+                    ? value === 'dnc'
+                      ? 'border-rose-500 bg-rose-600 text-white'
+                      : 'border-blue-500 bg-blue-600 text-white'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                {value === 'dnc' ? '🚫 ' : value === 'contact' ? '✓ ' : ''}{label}
+              </button>
+            );
+          })}
+        </div>
+        {(filters.dncStatus === 'dnc') && dncReasons.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {dncReasons.map(({ id, reason }) => {
+              const active = (filters.dncReasons || []).includes(reason);
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => {
+                    const cur = filters.dncReasons || [];
+                    f('dncReasons', active ? cur.filter((r) => r !== reason) : [...cur, reason]);
+                  }}
+                  className={`rounded-full border px-2.5 py-1 text-xs font-medium transition ${
+                    active
+                      ? 'border-rose-400 bg-rose-100 text-rose-700'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-rose-200 hover:bg-rose-50'
+                  }`}
+                >
+                  {reason}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Status */}
       <MultiCheck

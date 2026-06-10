@@ -35,6 +35,7 @@ export const CONTACT_TYPES = [
   'Media',
   'Project Developer',
   'Exchange',
+  'Originator',
 ];
 
 export const NEXT_ACTION_TYPES = ['Email', 'WhatsApp', 'Call', 'Meeting'];

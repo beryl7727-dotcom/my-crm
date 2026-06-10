@@ -1,13 +1,14 @@
 import React from 'react';
-import DoNotContactTag from './DoNotContactTag';
+import DoNotContactBadge from './DoNotContactBadge';
 
 // Stateless — parent (ContactsList) owns the hook and passes handlers down.
 export default function PipelineCheckbox({ contact, busy, onPush, onDnc, onClearDnc }) {
   if (contact.do_not_contact) {
     return (
-      <DoNotContactTag
-        contactId={contact.id}
-        onClear={onClearDnc}
+      <DoNotContactBadge
+        reason={contact.do_not_contact_reason}
+        date={contact.do_not_contact_date}
+        onClear={() => onClearDnc(contact.id)}
         loading={busy}
       />
     );

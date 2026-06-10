@@ -35,10 +35,15 @@ export function usePushToPipeline() {
     [currentTeam, user]
   );
 
-  const markDoNotContact = useCallback(async (contactId, onUpdate) => {
+  const markDoNotContact = useCallback(async (contactId, onUpdate, reason) => {
     setFlag(contactId, true);
     try {
-      await onUpdate(contactId, { do_not_contact: true, ready_for_pipeline: false });
+      await onUpdate(contactId, {
+        do_not_contact: true,
+        ready_for_pipeline: false,
+        do_not_contact_reason: reason || null,
+        do_not_contact_date: new Date().toISOString(),
+      });
     } finally {
       setFlag(contactId, false);
     }

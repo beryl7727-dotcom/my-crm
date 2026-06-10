@@ -40,6 +40,12 @@ const COLUMN_MAP = {
   'relationship score': 'relationship_score',
   'relationship_score': 'relationship_score',
   score: 'relationship_score',
+  'do not contact': 'do_not_contact',
+  'do_not_contact': 'do_not_contact',
+  dnc: 'do_not_contact',
+  'dnc reason': 'do_not_contact_reason',
+  'do not contact reason': 'do_not_contact_reason',
+  'do_not_contact_reason': 'do_not_contact_reason',
 };
 
 function parseCSV(text) {
@@ -101,10 +107,12 @@ const FIELD_OPTIONS = [
   { value: 'relationship_score', label: 'Relationship Score' },
   { value: 'next_touch_date', label: 'Next Touch Date' },
   { value: 'tags', label: 'Tags' },
+  { value: 'do_not_contact', label: 'Do Not Contact (true/false)' },
+  { value: 'do_not_contact_reason', label: 'DNC Reason' },
 ];
 
 // Valid enum values accepted by the database
-export const CONTACT_TYPE_VALUES = ['Trader','Corporate Buyer','Registry','Government','Media','Project Developer','Exchange'];
+export const CONTACT_TYPE_VALUES = ['Trader','Corporate Buyer','Registry','Government','Media','Project Developer','Exchange','Originator'];
 export const SOURCE_VALUES = ['RECS2025','LinkedIn','Referral','Conference / Event','Cold Outreach','Existing Client','Partner / Broker','Website','Other'];
 
 export default function ImportContactsModal({ onClose, onImport }) {
@@ -227,6 +235,7 @@ export default function ImportContactsModal({ onClose, onImport }) {
               <p><span className="font-semibold text-slate-700">Priority:</span> A+ · A · B · C</p>
               <p><span className="font-semibold text-slate-700">Stage:</span> Relationship · Discovery · Structuring · Execution · Refresh</p>
               <p><span className="font-semibold text-slate-700">Score:</span> 1 · 2 · 3 · 4 · 5 — Company names are auto-created if not found.</p>
+              <p><span className="font-semibold text-slate-700">Do Not Contact:</span> true · false (or yes · no)</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {headers.map((header, idx) => (

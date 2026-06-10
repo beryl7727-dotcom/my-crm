@@ -7,6 +7,7 @@ import RelationshipScoreStar from './RelationshipScoreStar';
 import PipelineCheckbox from './PipelineCheckbox';
 import { usePushToPipeline } from '../hooks/usePushToPipeline';
 import NewDealModal from './modals/NewDealModal';
+import DoNotContactModal from './DoNotContactModal';
 import { TIER_PRODUCTS, TIER_COLORS } from '../constants/products';
 
 const STAGE_STYLES = {
@@ -85,6 +86,7 @@ export default function ContactsList({
   const selectedSet = useMemo(() => new Set(selectedIds || []), [selectedIds]);
   const [hoveredId, setHoveredId] = useState(null);
   const [pipelineContact, setPipelineContact] = useState(null);
+  const [dncContact, setDncContact] = useState(null);
   const { markDoNotContact, clearDoNotContact, processing } = usePushToPipeline();
 
   // Open the relationship form pre-filled with this contact
@@ -105,13 +107,20 @@ export default function ContactsList({
     }
   };
 
-  const handleDnc = async (contactId) => {
+  const handleDnc = (contactId) => {
     const contact = contacts.find((c) => c.id === contactId);
+    if (contact) setDncContact(contact);
+  };
+
+  const handleDncSave = async (reason) => {
+    if (!dncContact) return;
     try {
-      await markDoNotContact(contactId, onUpdateContact);
-      toast.error(`${contact?.full_name || 'Contact'} marked as Do Not Contact`);
+      await markDoNotContact(dncContact.id, onUpdateContact, reason);
+      toast.error(`${dncContact.full_name} marked as Do Not Contact`);
     } catch (err) {
       toast.error(err.message || 'Failed to update contact');
+    } finally {
+      setDncContact(null);
     }
   };
 
@@ -333,6 +342,14 @@ export default function ContactsList({
           initialContact={pipelineContact}
           onClose={() => setPipelineContact(null)}
           onCreated={handlePipelineCreated}
+        />
+      )}
+
+      {dncContact && (
+        <DoNotContactModal
+          contact={dncContact}
+          onClose={() => setDncContact(null)}
+          onSave={handleDncSave}
         />
       )}
     </div>

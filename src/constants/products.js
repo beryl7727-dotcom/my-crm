@@ -40,6 +40,9 @@ export const TIER_PRODUCTS = {
   },
 };
 
+// Hex colours per tier (used in charts and inline styles)
+export const TIER_COLORS = { 1: '#10B981', 2: '#3B82F6', 3: '#F97316' };
+
 // Flat list of all products across tiers (for dropdowns etc.)
 export const ALL_PRODUCTS = Object.values(TIER_PRODUCTS).flatMap((t) => t.products);
 

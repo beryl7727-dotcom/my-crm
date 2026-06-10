@@ -99,6 +99,8 @@ const INITIAL_FILTERS = {
   tiers: [],
   markets: [],
   statuses: [],
+  dncStatus: 'all',
+  dncReasons: [],
   companyId: '',
   tag: '',
   createdBy: '',
@@ -271,6 +273,13 @@ export function useContacts() {
             stage: row.stage || null,
             next_touch_date: row.next_touch_date || null,
             relationship_score: score && score >= 1 && score <= 5 ? score : null,
+            do_not_contact: row.do_not_contact
+              ? ['true','yes','1'].includes(String(row.do_not_contact).toLowerCase())
+              : null,
+            do_not_contact_reason: row.do_not_contact_reason || null,
+            do_not_contact_date: (row.do_not_contact_reason || row.do_not_contact)
+              ? new Date().toISOString()
+              : null,
           }),
         };
       });
@@ -343,6 +352,13 @@ export function useContacts() {
         if (filters.hasRelationships === 'with' && contact.relationship_count === 0) return false;
         if (filters.hasRelationships === 'without' && contact.relationship_count > 0) return false;
 
+        // DNC status filter
+        if (filters.dncStatus === 'contact' && contact.do_not_contact) return false;
+        if (filters.dncStatus === 'dnc' && !contact.do_not_contact) return false;
+        if (filters.dncStatus === 'dnc' && filters.dncReasons?.length > 0) {
+          if (!filters.dncReasons.includes(contact.do_not_contact_reason)) return false;
+        }
+
         return true;
       }),
       filters.sortBy,
@@ -362,6 +378,8 @@ export function useContacts() {
     if (filters.tag) count++;
     if (filters.createdBy) count++;
     if (filters.hasRelationships !== 'all') count++;
+    if (filters.dncStatus && filters.dncStatus !== 'all') count++;
+    if (filters.dncReasons?.length) count++;
     return count;
   }, [filters]);
 
