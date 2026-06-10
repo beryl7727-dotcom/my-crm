@@ -26,15 +26,19 @@ create table if not exists do_not_contact_reasons (
 
 alter table do_not_contact_reasons enable row level security;
 
-create policy if not exists "view team dnc reasons"
+drop policy if exists "view team dnc reasons"   on do_not_contact_reasons;
+drop policy if exists "create team dnc reasons" on do_not_contact_reasons;
+drop policy if exists "delete own dnc reasons"  on do_not_contact_reasons;
+
+create policy "view team dnc reasons"
   on do_not_contact_reasons for select
   using (team_id in (select team_id from profiles where id = auth.uid()));
 
-create policy if not exists "create team dnc reasons"
+create policy "create team dnc reasons"
   on do_not_contact_reasons for insert
   with check (team_id in (select team_id from profiles where id = auth.uid()));
 
-create policy if not exists "delete own dnc reasons"
+create policy "delete own dnc reasons"
   on do_not_contact_reasons for delete
   using (team_id in (select team_id from profiles where id = auth.uid()));
 
